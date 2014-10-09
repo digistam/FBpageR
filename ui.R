@@ -13,14 +13,18 @@ shinyUI(
   navbarPage(  
     "", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
-    fileInput('dbfile', 'load database file:'),
-    #actionButton("goButton", "Query"),
-    fluidRow(
-      checkboxGroupInput('show_vars', '',
-                         names(DF), selected = names(c(DF[3],DF[5],DF[7],DF[8])), inline = T),
-    dataTableOutput(outputId="stream"),
-    tags$head(tags$style("tfoot {display: table-header-group;}"))
+      fileInput('dbfile', 'load database file:'),
+      #actionButton("goButton", "Query"),
+      fluidRow(
+        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[3],DF[5],DF[7],DF[8])), inline = T),
+        dataTableOutput(outputId="stream"),
+        tags$head(tags$style("tfoot {display: table-header-group;}"))
     )
-    )
+    ),
+    tabPanel("Influencers",
+      fluidRow(
+        dataTableOutput(outputId="influence"),
+        tags$head(tags$style("tfoot {display: table-header-group;}")))
+     )
   )
 )
