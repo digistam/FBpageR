@@ -45,12 +45,16 @@ shinyServer(function(input, output, session) {
       ev <- evcent(sg,directed = FALSE, scale = TRUE, weights = NULL, options = igraph.arpack.default)$vector
       ev <- as.data.frame(as.table(ev))
       names(ev) <- c('Username','Eigenvector centrality')
+      mn <- tapply(graph,INDEX = graph,FUN=table)
+      mn <- as.data.frame(as.table(mn))
+      names(mn) <- c('Username','Freq')
       user <- as.data.frame(unique(DF$actor_id))
       names(user) <- c('Username')
       person <- cbind(DF$actor,DF$actor_id)
       person <- as.data.frame(unique(person))
       names(person) <- c('Name','Username')
-      dd <- merge(user, dg, by = 'Username',incomparables = NULL, all.x = TRUE)
+      dd <- merge(user, mn, by = 'Username',incomparables = NULL, all.x = TRUE)
+      dd <- merge(dd, dg, by = 'Username',incomparables = NULL, all.x = TRUE)
       #dd <- merge(dd, bt, by = 'Username',incomparables = NULL, all.x = TRUE)
       dd <- merge(dd, pr, by = 'Username',incomparables = NULL, all.x = TRUE)
       dd <- merge(dd, ev, by = 'Username',incomparables = NULL, all.x = TRUE)
@@ -58,31 +62,32 @@ shinyServer(function(input, output, session) {
       dd[is.na(dd)] <- 0
       #cc <- table(unlist(paste(ddd[,1],ddd[,2],ddd[,3],ddd[,5],ddd[,4])))
       tbl <- dd
-      names(tbl) <- c('Account','Degree','PageRank','Eigenvector','Name')
+      names(tbl) <- c('Account','Frequency','Degree','PageRank','Eigenvector','Name')
 #       tbl$Degree <- as.numeric.factor(tbl$Degree)
 #       tbl$PageRank <- as.numeric.factor(tbl$PageRank)
 #       tbl$Eigenvector <- as.numeric.factor(tbl$Eigenvector)
-      tbl <- tbl[order(tbl$Degree, decreasing = T),]
+      tbl <- tbl[order(tbl$Frequency, decreasing = T),]
       df <- tbl
       #dd <<- as.data.frame(dd)
       #dd[order(!dd$PageRank),]
     })
 #     plotMe(dt,2)
     output$newGraph <- suppressWarnings(renderPlot({
-      graph <- cbind(DF$object_id,DF$actor_id)
+      graph <- cbind(DF$actor_id,DF$object_id)
       na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
       g <- graph.data.frame(graph, directed = F)
       set.seed(111)
       #layout1 <- layout.fruchterman.reingold(g)
-      layout1 <- layout.auto(g)
+      #layout1 <- layout.auto(g)
+      layout1 <- layout.fruchterman.reingold(ng)#, area=vcount(ng)^2)
       bad.vs <- V(g)[degree(g) < as.numeric(2)]
       ng <- delete.vertices(g, bad.vs)
       V(ng)$size = 2#degree(ng)*0.2
       V(ng)$color = degree(ng)+1
-      V(ng)$label.cex = 1.2#degree(ng)*0.1
+      V(ng)$label.cex = 0.9#degree(ng)*0.1
       #V(ng)$weight=degree(ng)
       ng <<- simplify(ng)
-      plot(ng)
+      plot(ng, layout = layout1)
       }))
     output$downloadGraph = downloadHandler(
       filename = "retweetnetwork.graphml",
