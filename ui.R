@@ -21,10 +21,15 @@ shinyUI(
         tags$head(tags$style("tfoot {display: table-header-group;}"))
     )
     ),
-    tabPanel("Influencers",
+    tabPanel("Actors",
       fluidRow(
         dataTableOutput(outputId="influence"),
         tags$head(tags$style("tfoot {display: table-header-group;}")))
-     )
+     ),
+    tabPanel("Graph",
+             fluidRow(
+               downloadButton('downloadGraph', 'Download Graph (Gephi)'),
+               plotOutput('newGraph', height = 1200, width = '100%')
+    ))
   )
 )

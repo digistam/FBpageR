@@ -12,7 +12,7 @@ import facebookcredentials
 _access_token = facebookcredentials.ACCESS_TOKEN
 
 import sqlite3
-conn = sqlite3.connect('test.db')
+conn = sqlite3.connect('mh17.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -25,7 +25,7 @@ from time import sleep
 import facebookobjects
 
 # create table if not exists
-table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id INTEGER, object_name TEXT, post_id INTEGER,actor TEXT,actor_id INTEGER,date TEXT, message TEXT, story TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
+table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
 c.execute(table)
 
 # create the function

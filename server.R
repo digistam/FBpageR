@@ -25,25 +25,69 @@ shinyServer(function(input, output, session) {
       DF[, input$show_vars, drop = FALSE]
     })
     output$influence <- renderDataTable({
-      graph <- cbind(DF$object_name,DF$actor_id)
-      g <- graph.data.frame(graph)
-      bt <- betweenness(g)
-      bt <- as.data.frame(as.table(bt))
-      pr <- page.rank(g)$vector
+      graph <- cbind(DF$object_id,DF$actor_id)
+      na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
+      g <<- graph.data.frame(graph, directed = F)
+      V(g)$size=degree(g)*5
+      V(g)$color=degree(g)+1
+      sg <<- simplify(g)
+      #dg <- degree.distribution(g)
+      dg <- degree(sg, v=V(g), mode = c("total"), loops = TRUE, normalized = FALSE) 
+      dg <- as.data.frame(as.table(dg))
+      names(dg) <- c('Username','Degree')
+      dg <<- dg
+      #bt <- betweenness(sg)
+      #bt <- as.data.frame(as.table(bt))
+      #names(bt) <- c('Username','Betweenness')
+      pr <- page.rank(sg)$vector
       pr <- as.data.frame(as.table(pr))
-      ev <- evcent(g,directed = FALSE, scale = TRUE, weights = NULL, options = igraph.arpack.default)$vector
-      ev <- as.data.frame(as.table(ev))
-      user <- as.data.frame(unique(DF$actor))
-      names(bt) <- c('Username','Betweenness')
       names(pr) <- c('Username','PageRank')
+      ev <- evcent(sg,directed = FALSE, scale = TRUE, weights = NULL, options = igraph.arpack.default)$vector
+      ev <- as.data.frame(as.table(ev))
       names(ev) <- c('Username','Eigenvector centrality')
+      user <- as.data.frame(unique(DF$actor_id))
       names(user) <- c('Username')
-      dd <- merge(user, bt, by = 'Username',incomparables = NULL, all.x = TRUE)
+      person <- cbind(DF$actor,DF$actor_id)
+      person <- as.data.frame(unique(person))
+      names(person) <- c('Name','Username')
+      dd <- merge(user, dg, by = 'Username',incomparables = NULL, all.x = TRUE)
+      #dd <- merge(dd, bt, by = 'Username',incomparables = NULL, all.x = TRUE)
       dd <- merge(dd, pr, by = 'Username',incomparables = NULL, all.x = TRUE)
       dd <- merge(dd, ev, by = 'Username',incomparables = NULL, all.x = TRUE)
+      dd <- merge(dd, person, by = 'Username',incomparables = NULL, all.x = TRUE)
       dd[is.na(dd)] <- 0
-      dd <<- as.data.frame(dd)
-      dd[order(!dd$PageRank),]
+      #cc <- table(unlist(paste(ddd[,1],ddd[,2],ddd[,3],ddd[,5],ddd[,4])))
+      tbl <- dd
+      names(tbl) <- c('Account','Degree','PageRank','Eigenvector','Name')
+#       tbl$Degree <- as.numeric.factor(tbl$Degree)
+#       tbl$PageRank <- as.numeric.factor(tbl$PageRank)
+#       tbl$Eigenvector <- as.numeric.factor(tbl$Eigenvector)
+      tbl <- tbl[order(tbl$Degree, decreasing = T),]
+      df <- tbl
+      #dd <<- as.data.frame(dd)
+      #dd[order(!dd$PageRank),]
     })
+#     plotMe(dt,2)
+    output$newGraph <- suppressWarnings(renderPlot({
+      graph <- cbind(DF$object_id,DF$actor_id)
+      na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
+      g <- graph.data.frame(graph, directed = F)
+      set.seed(111)
+      #layout1 <- layout.fruchterman.reingold(g)
+      layout1 <- layout.auto(g)
+      bad.vs <- V(g)[degree(g) < as.numeric(2)]
+      ng <- delete.vertices(g, bad.vs)
+      V(ng)$size = 2#degree(ng)*0.2
+      V(ng)$color = degree(ng)+1
+      V(ng)$label.cex = 1.2#degree(ng)*0.1
+      #V(ng)$weight=degree(ng)
+      ng <<- simplify(ng)
+      plot(ng)
+      }))
+    output$downloadGraph = downloadHandler(
+      filename = "retweetnetwork.graphml",
+      content = function(file) {
+      write.graph(g, file, format <- 'graphml')
+  })
   })
 })
