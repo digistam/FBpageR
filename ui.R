@@ -11,9 +11,9 @@ library(shinyIncubator)
 shinyUI(
   
   navbarPage(  
-    "", id="nav", windowTitle="Dataset",
+    "Facebook Data Analyzer", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
-      fileInput('dbfile', 'load database file:'),
+      fileInput('dbfile', 'Load Dataset ::'),
       #actionButton("goButton", "Query"),
       fluidRow(
         checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[3],DF[5],DF[7],DF[8])), inline = T),
@@ -28,8 +28,24 @@ shinyUI(
      ),
     tabPanel("Graph",
              fluidRow(
-               downloadButton('downloadGraph', 'Download Graph (Gephi)'),
-               plotOutput('newGraph', height = 1200, width = '100%')
+               plotOutput('newGraph', height = 1200, width = '100%'),
+               conditionalPanel(
+                 condition = "exists('ng')",
+                 downloadButton('downloadGraph', 'Download Graph (Gephi)')
+               )
     ))
+    #     tabPanel("TimeSeries",
+    #              
+    #              p('dataset: '),
+    #              
+    #              textOutput('Time_myKeyword'),
+    #              
+    #              fluidRow(
+    #                htmlOutput('timeSeries')),
+    #              p(),
+    #              sliderInput('timeSlider', 'Period in hours', 12, min =1, max = 24, step = 1),
+    #              checkboxInput("useSlider", "Unlimited period", FALSE),
+    #              verbatimTextOutput('sliderinfo')
+    #     ),
   )
 )
