@@ -65,11 +65,17 @@ shinyServer(function(input, output, session) {
       na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
       g <- graph.data.frame(graph, directed = F)
       set.seed(111)
-      bad.vs <- V(g)[degree(g) < as.numeric(2)]
+      bad.vs <- V(g)[degree(g) < as.numeric(input$visibleNodes)]
       ng <- delete.vertices(g, bad.vs)
       V(ng)$size = 2
       V(ng)$color = degree(ng)+1
-      V(ng)$label.cex = 0.9
+      #V(ng)$label.cex[degree(ng) > 20] = 3
+      #input$highDegree
+      V(ng)$label.cex[degree(ng) > as.integer(input$highDegree)] = as.integer(input$labelSizeHighDegree)
+      V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowerDegree)
+      V(ng)$label.cex[degree(ng) < 3] = as.integer(input$labelSizeLowDegree)
+      V(ng)$label.color[degree(ng) > as.integer(input$highDegree)] = 'red'
+      V(ng)$label.color[degree(ng) < as.integer(input$highDegree)] = 'black'
       layout1 <- layout.fruchterman.reingold(ng)
       ng <- simplify(ng)
       plot(ng, layout = layout1)
