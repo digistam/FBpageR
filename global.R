@@ -10,6 +10,7 @@ if (!require("tm")) {
   install.packages("tm", repos="http://cran.rstudio.com/") 
   library("tm") 
 }
+windowsFonts(Arial=windowsFont("TT Arial"))
 connectSQL <- function(x) {
   set.seed(111)
   drv <<- dbDriver("SQLite")

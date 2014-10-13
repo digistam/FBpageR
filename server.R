@@ -4,6 +4,11 @@ if (!require("lubridate")) {
   install.packages("lubridate", repos="http://cran.rstudio.com/") 
   library("lubridate") 
 }
+library(shinyIncubator)
+if (!require("googleVis")) {
+  install.packages("googleVis", repos="http://cran.rstudio.com/") 
+  library("googleVis") 
+}
 shinyServer(function(input, output, session) {
   observe({
     inFile<-input$dbfile
@@ -61,24 +66,38 @@ shinyServer(function(input, output, session) {
       df <- tbl
     })
     output$newGraph <- suppressWarnings(renderPlot({
+      withProgress(session, {
+        setProgress(message = "Calculating, please wait",
+                    detail = "This may take a few moments...")
+        Sys.sleep(1)
       graph <- cbind(DF$actor_id,DF$object_id)
       na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
       g <- graph.data.frame(graph, directed = F)
       set.seed(111)
       bad.vs <- V(g)[degree(g) < as.numeric(input$visibleNodes)]
       ng <- delete.vertices(g, bad.vs)
-      V(ng)$size = 2
+      V(ng)$size[degree(ng) > as.integer(input$highDegree)] = as.integer(input$nodeSizeHighDegree)
+      V(ng)$size[degree(ng) < as.integer(input$highDegree)] = as.integer(input$nodeSizeLowDegree)
+      #V(ng)$size = 2
       V(ng)$color = degree(ng)+1
       #V(ng)$label.cex[degree(ng) > 20] = 3
       #input$highDegree
       V(ng)$label.cex[degree(ng) > as.integer(input$highDegree)] = as.integer(input$labelSizeHighDegree)
-      V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowerDegree)
-      V(ng)$label.cex[degree(ng) < 3] = as.integer(input$labelSizeLowDegree)
+      V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)
+      if(input$labelSizeLowDegree == 0) {
+        V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = 0.1
+      }
+      else {
+        V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)  
+      }
       V(ng)$label.color[degree(ng) > as.integer(input$highDegree)] = 'red'
       V(ng)$label.color[degree(ng) < as.integer(input$highDegree)] = 'black'
+      V(ng)$label.family <- "Arial"
       layout1 <- layout.fruchterman.reingold(ng)
       ng <- simplify(ng)
+      setProgress(detail = "Generating plot ...")
       plot(ng, layout = layout1)
+      })
       }))
     output$downloadGraph = downloadHandler(
       filename = "network.graphml",

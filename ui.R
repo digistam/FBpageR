@@ -29,11 +29,18 @@ shinyUI(
     tabPanel("Graph",
              fluidRow(
                sidebarPanel(
-               sliderInput('visibleNodes', 'Minimal degree', 2, min = 2, max = 5, step = 1),
-               sliderInput('highDegree', 'Define high degree', 20, min = 1, max = 100, step = 1),
-               sliderInput('labelSizeHighDegree', 'Label size high degree', 3, min = 1, max = 10, step = 1),
-               sliderInput('labelSizeLowerDegree', 'Label size lower degree', 0.9, min = 0.5, max = 3, step = 0.1),
-               sliderInput('labelSizeLowDegree', 'Label size lowest degree', 0.5, min = 0, max = 2, step = 0.1),
+               HTML('<b>GRAPH DASHBOARD</b><br /><br />'),
+               sliderInput('visibleNodes', 'Minimum frequency', 2, min = 2, max = 10, step = 1),
+               sliderInput('highDegree', 'High frequency definition', 20, min = 1, max = 100, step = 1),
+               HTML('<hr>'),
+               HTML('<b>High frequency nodes</b>'),
+               sliderInput('nodeSizeHighDegree', 'Node size', 5, min = 1, max = 100, step = 1),
+               sliderInput('labelSizeHighDegree', 'Label size', 3, min = 1, max = 10, step = 1),
+               HTML('<hr>'),
+               HTML('<b>Low frequency nodes</b>'),
+               sliderInput('nodeSizeLowDegree', 'Node size', 1, min = 1, max = 10, step = 1),
+               #sliderInput('labelSizeLowerDegree', 'Label size', 0.9, min = 0.5, max = 3, step = 0.1),
+               sliderInput('labelSizeLowDegree', 'Label size', 1, min = 0, max = 10, step = 1),
                HTML('<br /><br />'),
                conditionalPanel(
                  condition = "exists('ng')",
