@@ -11,7 +11,7 @@ library(shinyIncubator)
 shinyUI(
   
   navbarPage(  
-    "Facebook Data Analyzer", id="nav", windowTitle="Dataset",
+    "Facebook Graph Analyzer", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
       fileInput('dbfile', 'Load Dataset ::'),
       #actionButton("goButton", "Query"),
@@ -30,7 +30,7 @@ shinyUI(
              fluidRow(
                sidebarPanel(
                HTML('<b>GRAPH DASHBOARD</b><br /><br />'),
-               sliderInput('visibleNodes', 'Minimum frequency', 2, min = 2, max = 10, step = 1),
+               sliderInput('visibleNodes', 'Minimum frequency', 2, min = 2, max = 50, step = 1),
                sliderInput('highDegree', 'High frequency definition', 20, min = 1, max = 100, step = 1),
                HTML('<hr>'),
                HTML('<b>High frequency nodes</b>'),
@@ -41,6 +41,7 @@ shinyUI(
                sliderInput('nodeSizeLowDegree', 'Node size', 1, min = 1, max = 10, step = 1),
                #sliderInput('labelSizeLowerDegree', 'Label size', 0.9, min = 0.5, max = 3, step = 0.1),
                sliderInput('labelSizeLowDegree', 'Label size', 1, min = 0, max = 10, step = 1),
+#                checkboxInput("hideNodes", "Hide nodes with degree 1", FALSE),
                HTML('<br /><br />'),
                conditionalPanel(
                  condition = "exists('ng')",

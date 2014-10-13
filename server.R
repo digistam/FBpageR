@@ -90,11 +90,15 @@ shinyServer(function(input, output, session) {
       else {
         V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)  
       }
+#       if(input$hideNodes == T) {
+#         bad.vs <- V(ng)[degree(ng) < 2]
+#         ng <- delete.vertices(ng, bad.vs)
+#       }
       V(ng)$label.color[degree(ng) > as.integer(input$highDegree)] = 'red'
       V(ng)$label.color[degree(ng) < as.integer(input$highDegree)] = 'black'
       V(ng)$label.family <- "Arial"
       layout1 <- layout.fruchterman.reingold(ng)
-      ng <- simplify(ng)
+      ng <<- simplify(ng)
       setProgress(detail = "Generating plot ...")
       plot(ng, layout = layout1)
       })
