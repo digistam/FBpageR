@@ -4,11 +4,18 @@ if (!require("lubridate")) {
   install.packages("lubridate", repos="http://cran.rstudio.com/") 
   library("lubridate") 
 }
-library(shinyIncubator)
+
 if (!require("googleVis")) {
   install.packages("googleVis", repos="http://cran.rstudio.com/") 
   library("googleVis") 
 }
+
+if (!require(devtools)) {
+  install.packages("devtools")
+  devtools::install_github("rstudio/shiny-incubator")
+}
+library(shinyIncubator)
+
 shinyServer(function(input, output, session) {
   observe({
     inFile<-input$dbfile
@@ -29,6 +36,8 @@ shinyServer(function(input, output, session) {
       DF[, input$show_vars, drop = FALSE]
     })
     output$influence <- renderDataTable({
+      withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
+      Sys.sleep(1)
       graph <- cbind(DF$object_id,DF$actor_id)
       na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
       g <<- graph.data.frame(graph, directed = F)
@@ -64,43 +73,81 @@ shinyServer(function(input, output, session) {
       names(tbl) <- c('Account','Name','Frequency','Degree','PageRank','Eigenvector')
       tbl <- tbl[order(tbl$Frequency, decreasing = T),]
       df <- tbl
+      })
     })
     output$newGraph <- suppressWarnings(renderPlot({
-      withProgress(session, {
-        setProgress(message = "Calculating, please wait",
-                    detail = "This may take a few moments...")
-        Sys.sleep(1)
-      graph <- cbind(DF$actor_id,DF$object_id)
-      na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
-      g <- graph.data.frame(graph, directed = F)
-      set.seed(111)
-      bad.vs <- V(g)[degree(g) < as.numeric(input$visibleNodes)]
-      ng <- delete.vertices(g, bad.vs)
-      V(ng)$size[degree(ng) > as.integer(input$highDegree)] = as.integer(input$nodeSizeHighDegree)
-      V(ng)$size[degree(ng) < as.integer(input$highDegree)] = as.integer(input$nodeSizeLowDegree)
-      #V(ng)$size = 2
-      V(ng)$color = degree(ng)+1
-      #V(ng)$label.cex[degree(ng) > 20] = 3
-      #input$highDegree
-      V(ng)$label.cex[degree(ng) > as.integer(input$highDegree)] = as.integer(input$labelSizeHighDegree)
-      V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)
-      if(input$labelSizeLowDegree == 0) {
-        V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = 0.1
-      }
-      else {
-        V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)  
-      }
-#       if(input$hideNodes == T) {
-#         bad.vs <- V(ng)[degree(ng) < 2]
-#         ng <- delete.vertices(ng, bad.vs)
+     
+
+#       graph <- cbind(DF$actor_id,DF$object_id)
+#       na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
+#       g <- graph.data.frame(graph, directed = F)
+#       set.seed(111)
+#       bad.vs <- V(g)[degree(g) < as.numeric(input$visibleNodes)]
+#       ng <- delete.vertices(g, bad.vs)
+#       V(ng)$size[degree(ng) > as.integer(input$highDegree)] = as.integer(input$nodeSizeHighDegree)
+#       V(ng)$size[degree(ng) < as.integer(input$highDegree)] = as.integer(input$nodeSizeLowDegree)
+#       #V(ng)$size = 2
+#       V(ng)$color = degree(ng)+1
+#       #V(ng)$label.cex[degree(ng) > 20] = 3
+#       #input$highDegree
+#       V(ng)$label.cex[degree(ng) > as.integer(input$highDegree)] = as.integer(input$labelSizeHighDegree)
+#       V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)
+#       if(input$labelSizeLowDegree == 0) {
+#         V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = 0.1
 #       }
-      V(ng)$label.color[degree(ng) > as.integer(input$highDegree)] = 'red'
-      V(ng)$label.color[degree(ng) < as.integer(input$highDegree)] = 'black'
-      V(ng)$label.family <- "Arial"
-      layout1 <- layout.fruchterman.reingold(ng)
-      ng <<- simplify(ng)
-      setProgress(detail = "Generating plot ...")
-      plot(ng, layout = layout1)
+#       else {
+#         V(ng)$label.cex[degree(ng) < as.integer(input$highDegree)] = as.integer(input$labelSizeLowDegree)  
+#       }
+# #       if(input$hideNodes == T) {
+# #         bad.vs <- V(ng)[degree(ng) < 2]
+# #         ng <- delete.vertices(ng, bad.vs)
+# #       }
+#       V(ng)$label.color[degree(ng) > as.integer(input$highDegree)] = 'red'
+#       V(ng)$label.color[degree(ng) < as.integer(input$highDegree)] = 'black'
+#       V(ng)$label.family <- "Arial"
+#       layout1 <- layout.fruchterman.reingold(ng)
+#       ng <<- simplify(ng)
+#       setProgress(detail = "Generating plot ...")
+#       plot(ng, layout = layout1)
+        withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
+        Sys.sleep(0.5)
+        graph <- cbind(DF$actor_id,DF$object_id)
+        na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
+        g <- graph.data.frame(graph, directed = F)
+        set.seed(111)
+        bad.vs <- V(g)[degree(g) < 2]
+        ng <- delete.vertices(g, bad.vs)
+        # V(ng)$size[degree(ng) > 10] = 3
+        # V(ng)$size[degree(ng) < 10] = 2
+        setProgress(detail = "Generating nodes and edges ...")
+        Sys.sleep(1)
+        V(ng)$size = 3
+        V(ng)$color = degree(ng)+1
+        #V(ng)$label.cex[degree(ng) > 20] = 3
+        #input$highDegree
+        V(ng)$label.cex[degree(ng) > 20] = 3
+        V(ng)$label.cex[degree(ng) < 20] = 0.75
+        #if(input$labelSizeLowDegree == 0) {
+        #  V(ng)$label.cex[degree(ng) < 20] = 0.1
+        #}
+        #else {
+        #  V(ng)$label.cex[degree(ng) < 20] = 4  
+        #}
+        #       if(input$hideNodes == T) {
+        #         bad.vs <- V(ng)[degree(ng) < 2]
+        #         ng <- delete.vertices(ng, bad.vs)
+        #       }
+        setProgress(detail = "Generating labels ...")
+        Sys.sleep(1)
+        V(ng)$label.color[degree(ng) > 20] = 'red'
+        V(ng)$label.color[degree(ng) < 20] = 'black'
+        V(ng)$label.family <- "Arial"
+        setProgress(detail = "Generating graph layout ...")
+        Sys.sleep(1)
+        layout1 <- layout.fruchterman.reingold(ng)
+        ng <<- simplify(ng)
+        setProgress(detail = "Generating graph output ...")
+        plot(ng, layout = layout1)
       })
       }))
     output$downloadGraph = downloadHandler(
