@@ -17,7 +17,7 @@ shinyUI(
       #actionButton("goButton", "Query"),
       progressInit(),
       fluidRow(
-        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[3],DF[5],DF[7],DF[8])), inline = T),
+        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[1],DF[3],DF[5],DF[7],DF[8],DF[11],DF[14])), inline = T),
         dataTableOutput(outputId="stream"),
         tags$head(tags$style("tfoot {display: table-header-group;}"))
     )

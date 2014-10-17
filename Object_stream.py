@@ -126,6 +126,8 @@ for i in range(len(facebookobjects.objects)):
 # remove duplicate items from table
 dups = "DELETE FROM stream WHERE id NOT IN (SELECT MAX(id) FROM stream GROUP BY post_id);"
 c.execute(dups)
+dups = "DELETE FROM likes WHERE id NOT IN (SELECT MAX(id) FROM likes GROUP BY post_id,actor_id);"
+c.execute(dups)
 # remove items from table which have been posted before 2013-01-01
 dates = "DELETE FROM stream WHERE date LIKE '%2011%' OR date LIKE '%2012%'"
 c.execute(dates)
