@@ -22,51 +22,34 @@ shinyUI(
         tags$head(tags$style("tfoot {display: table-header-group;}"))
     )
     ),
-    tabPanel("Actors",
+    tabPanel("Likers",
       fluidRow(
-        dataTableOutput(outputId="influence"),
+        dataTableOutput(outputId="likers"),
         tags$head(tags$style("tfoot {display: table-header-group;}")))
      ),
-    tabPanel("Graph",
+    tabPanel("Commenters",
+             fluidRow(
+               dataTableOutput(outputId="commenters"),
+               tags$head(tags$style("tfoot {display: table-header-group;}")))
+    ),
+    tabPanel("Commenters Graph",
+             mainPanel(
+               plotOutput('commentersGraph', height = 1200, width = '100%')
+             )
+             ),
+    tabPanel("Likers Graph",
              tags$link(rel = 'stylesheet', type = 'text/css', href = 'styles.css'),
              fluidRow(
                sidebarPanel(
                HTML('<b>GRAPH DASHBOARD</b><br /><br />'),
-#                sliderInput('visibleNodes', 'Minimum frequency', 1, min = 1, max = 50, step = 1),
-#                sliderInput('highDegree', 'High frequency definition', 1, min = 1, max = 50, step = 1),
-#                HTML('<hr>'),
-#                HTML('<b>High frequency nodes</b>'),
-#                sliderInput('nodeSizeHighDegree', 'Node size', 2, min = 1, max = 100, step = 1),
-#                sliderInput('labelSizeHighDegree', 'Label size', 2, min = 1, max = 10, step = 1),
-#                HTML('<hr>'),
-#                HTML('<b>Low frequency nodes</b>'),
-#                sliderInput('nodeSizeLowDegree', 'Node size', 1, min = 1, max = 10, step = 1),
-#                #sliderInput('labelSizeLowerDegree', 'Label size', 0.9, min = 0.5, max = 3, step = 0.1),
-#                sliderInput('labelSizeLowDegree', 'Label size', 1, min = 0, max = 10, step = 1),
-# #                checkboxInput("hideNodes", "Hide nodes with degree 1", FALSE),
-#                HTML('<br /><br />'),
                conditionalPanel(
-                 condition = "exists('ng')",
+                 condition = "exists('g')",
                  downloadButton('downloadGraph', 'Download Graph (Gephi)')
                ),width = 2),
                mainPanel(
-                 plotOutput('newGraph', height = 1200, width = '100%')
+                 plotOutput('likersGraph', height = 1200, width = '100%')
                  )
     )
 )
-    #     tabPanel("TimeSeries",
-    #              
-    #              p('dataset: '),
-    #              
-    #              textOutput('Time_myKeyword'),
-    #              
-    #              fluidRow(
-    #                htmlOutput('timeSeries')),
-    #              p(),
-    #              sliderInput('timeSlider', 'Period in hours', 12, min =1, max = 24, step = 1),
-    #              checkboxInput("useSlider", "Unlimited period", FALSE),
-    #              verbatimTextOutput('sliderinfo')
-    #     ),
-
   )
 )
