@@ -25,6 +25,7 @@ shinyUI(
 
     tabPanel("Authors",
              fluidRow(
+               
                dataTableOutput(outputId="authors"),
                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
