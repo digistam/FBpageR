@@ -88,7 +88,7 @@ shinyServer(function(input, output, session) {
       df[!df$PageRank == 0, ]
       })
     })
-output$commenters <- renderDataTable({
+output$authors <- renderDataTable({
   withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
                          Sys.sleep(1)
                          set.seed(111)
@@ -136,18 +136,19 @@ output$commenters <- renderDataTable({
     output$likersGraph <- suppressWarnings(renderPlot({
         withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
         Sys.sleep(0.5)
-        graph <- cbind(DF$liker_id,DF$post_id)
+        #graph <- cbind(DF$liker_id,DF$post_id)
+        graph <- cbind(DF$liker,DF$actor)
         na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
         g <- graph.data.frame(graph, directed = T)
         g <- delete.vertices(g, which(is.na(V(g)$name))) 
-        bad.vs <- V(g)[degree(g) < 1]
+        bad.vs <- V(g)[degree(g) < 2]
         ng <- delete.vertices(g, bad.vs)
         setProgress(detail = "Generating nodes and edges ...")
         Sys.sleep(1)
-        V(ng)$size = degree(ng)
+        V(ng)$size = 2 #degree(ng)/4
         V(ng)$color = degree(ng)+1
-        V(ng)$label.cex[degree(ng) > 20] = 3
-        V(ng)$label.cex[degree(ng) < 20] = degree(ng)/3
+        V(ng)$label.cex[degree(ng) > 20] = 2
+        V(ng)$label.cex[degree(ng) < 20] = 1 #degree(ng)/4
         V(ng)$label.cex[V(ng)$label.cex < 1] = 1
         setProgress(detail = "Generating labels ...")
         Sys.sleep(1)
@@ -162,7 +163,7 @@ output$commenters <- renderDataTable({
         plot(ng, layout = layout1)
       })
       }))
-output$commentersGraph <- suppressWarnings(renderPlot({
+output$authorsGraph <- suppressWarnings(renderPlot({
   withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
                          Sys.sleep(0.5)
                          graph <- cbind(DF$actor,DF$post_id)

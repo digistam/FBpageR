@@ -11,7 +11,7 @@ library(shinyIncubator)
 shinyUI(
   
   navbarPage(  
-    "Facebook Graph Analyzer", id="nav", windowTitle="Dataset",
+    "Facebook Feed Analyzer", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
       fileInput('dbfile', 'Load Dataset ::'),
       #actionButton("goButton", "Query"),
@@ -22,19 +22,20 @@ shinyUI(
         tags$head(tags$style("tfoot {display: table-header-group;}"))
     )
     ),
-    tabPanel("Likers",
-      fluidRow(
-        dataTableOutput(outputId="likers"),
-        tags$head(tags$style("tfoot {display: table-header-group;}")))
-     ),
-    tabPanel("Commenters",
+
+    tabPanel("Authors",
              fluidRow(
-               dataTableOutput(outputId="commenters"),
+               dataTableOutput(outputId="authors"),
                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
-    tabPanel("Commenters Graph",
+    tabPanel("Likers",
+             fluidRow(
+               dataTableOutput(outputId="likers"),
+               tags$head(tags$style("tfoot {display: table-header-group;}")))
+    ),
+    tabPanel("Authors Graph",
              mainPanel(
-               plotOutput('commentersGraph', height = 1200, width = '100%')
+               plotOutput('authorsGraph', height = 1200, width = '100%')
              )
              ),
     tabPanel("Likers Graph",
