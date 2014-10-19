@@ -22,8 +22,8 @@ queryTable <- function(x) {
   q <- dbGetQuery(con, paste("SELECT * FROM ", x, "", sep=""))
   DF <<- as.data.frame(q)
 }
-DF <- data.frame(replicate(15,sample(0:1,20,rep=TRUE)))
-names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","comments","likes","application","like_id","liker","liker_id")
+DF <- data.frame(replicate(17,sample(0:1,20,rep=TRUE)))
+names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
 
 as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
@@ -34,17 +34,3 @@ textMine <- function(x) {
   DF.corpus <- tm_map(DF.corpus, removeWords, DF.stopwords)
   DF.dtm <<- TermDocumentMatrix(DF.corpus,control = list(wordLengths = c(2,10)))
 }
-
-# plotMe <- function(x,y) {
-#   g <- graph.data.frame(x, directed=F)
-#   ## set seed to make the layout reproducible
-#   set.seed(111)
-#   layout1 <- layout.auto(g)
-#   bad.vs <- V(g)[degree(g) < as.numeric(y)]
-#   ng <- delete.vertices(g, bad.vs)
-#   V(ng)$size=degree(ng)*5
-#   V(ng)$color=degree(ng)+1
-#   V(ng)$label.cex <- degree(ng)*0.8
-#   V(ng)$weight=degree(ng)
-#   ng <<- simplify(ng)
-# }

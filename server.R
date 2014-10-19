@@ -34,7 +34,7 @@ shinyServer(function(input, output, session) {
         q <- dbGetQuery(con, "SELECT * FROM likes")
         DFlikes <<- as.data.frame.matrix(q)  
         DF <- merge(DF, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
-        names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","comments","likes","application","like_id","liker","liker_id")
+        names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
         DF$date <- as.POSIXct(DF$date,format = "%Y-%m-%dT%H:%M:%S+0000", tz = "UTC")
         DF$date <- with_tz(DF$date, "Europe/Paris")
         DF <<- DF

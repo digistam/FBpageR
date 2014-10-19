@@ -12,7 +12,7 @@ import facebookcredentials
 _access_token = facebookcredentials.ACCESS_TOKEN
 
 import sqlite3
-conn = sqlite3.connect('person2.db')
+conn = sqlite3.connect('alexander.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -23,7 +23,7 @@ from time import sleep
 import facebookobjects
 
 # create table if not exists
-table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
+table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
 c.execute(table)
 likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_id TEXT)"
 c.execute(likeTable)
@@ -33,7 +33,7 @@ def parse_stream(object_id):
     try:
         print object_id
         # Query the Facebook database
-        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100).fields(from,created_time,likes.limit(100),comments,message,story,application)&access_token=%s' % (_object_id,_access_token))
+        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description}&access_token=%s' % (_object_id,_access_token))
         parsed_json = json.load(urllib2.urlopen(url))
         #print parsed_json
         dict = []
@@ -46,8 +46,7 @@ def parse_stream(object_id):
             row.append(item['id'])
             row.append(item['from']['name'].encode('utf-8'))
             row.append(item['from']['id'])
-            row.append(item['created_time'])
-            
+            row.append(item['created_time'])           
             if item.has_key("message"):
                 row.append(item['message'].encode('utf-8'))
             else:
@@ -56,6 +55,14 @@ def parse_stream(object_id):
                 row.append(item['story'].encode('utf-8'))
             else:
                 row.append(' ')
+            if item.has_key("link"):
+                row.append(item['link'])
+            else:
+                row.append('')
+            if item.has_key("description"):
+                row.append(item['description'])
+            else:
+                row.append('')
             try:
                 countComments = [] # aantal comments
                 for i in range(len(item['comments']['data'])):
@@ -100,12 +107,14 @@ def parse_stream(object_id):
                     row.append('')
                     row.append('')
                     row.append('')
+                    row.append('')
+                    row.append('')
                     dict.append(row)
             except KeyError, e:
                 e
 
             #print row
-            sql = "INSERT INTO stream (object_id, object_name, post_id, actor, actor_id, date, message, story, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+            sql = "INSERT INTO stream (object_id, object_name, post_id, actor, actor_id, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
             c.executemany(sql, dict)
             likeSql = "INSERT INTO likes (post_id, actor, actor_id) VALUES (?,?,?)"
             c.executemany(likeSql, likedict)
