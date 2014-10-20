@@ -28,7 +28,7 @@ shinyServer(function(input, output, session) {
     output$stream <- renderDataTable({
       isolate({
         q <- dbGetQuery(con, "SELECT * FROM stream ORDER BY date DESC")
-        DFcontent <- as.data.frame.matrix(q)
+        DFcontent <<- as.data.frame.matrix(q)
         q <- dbGetQuery(con, "SELECT * FROM likes")
         DFlikes <<- as.data.frame.matrix(q)  
         DF <- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
