@@ -9,10 +9,11 @@ import urllib2
 from urllib2 import HTTPError, URLError
 # import credentials
 import facebookcredentials
-_access_token = facebookcredentials.ACCESS_TOKEN
+#_access_token = facebookcredentials.ACCESS_TOKEN
+_access_token = 'CAACEdEose0cBAKeMOSkficT3RpnyyrQZA09cXucPxJMlFwAlKSiwuDeCxe5MzIExH210zJIFSK92YLBofIuvl9IIVGkSz7ZABvzARjQVF1te0NsGUhZBCDgJ7FNpYmHTEvu0X9mFRCB8QYYAoBI3bZC9ROZBQzmQdAeouaIk6ZCIUjZCVYph3gk4pyoyhtZAMWg5PK9o1VxZAF3XaoWg2DpfRSNNhhjIWmsUZD'
 
 import sqlite3
-conn = sqlite3.connect('alexander.db')
+conn = sqlite3.connect('avifauna.db')
 conn.text_factory = str
 c = conn.cursor()
 

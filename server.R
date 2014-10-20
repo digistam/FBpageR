@@ -27,13 +27,11 @@ shinyServer(function(input, output, session) {
     
     output$stream <- renderDataTable({
       isolate({
-#         q <- dbGetQuery(con, "SELECT * FROM stream ORDER BY date DESC")
-#         DF <<- as.data.frame.matrix(q)
         q <- dbGetQuery(con, "SELECT * FROM stream ORDER BY date DESC")
-        DF <- as.data.frame.matrix(q)
+        DFcontent <- as.data.frame.matrix(q)
         q <- dbGetQuery(con, "SELECT * FROM likes")
         DFlikes <<- as.data.frame.matrix(q)  
-        DF <- merge(DF, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
+        DF <- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
         names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
         DF$date <- as.POSIXct(DF$date,format = "%Y-%m-%dT%H:%M:%S+0000", tz = "UTC")
         DF$date <- with_tz(DF$date, "Europe/Paris")
@@ -88,8 +86,27 @@ shinyServer(function(input, output, session) {
       df[!df$PageRank == 0, ]
       })
     })
-output$authors <- renderDataTable({
-  withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
+    output$stat_links <- renderDataTable({
+      link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
+      link <- as.data.frame(as.table(link))
+      names(link) <- c('Url','Frequency')
+      link[link$Url=="",] <- NA
+      link <- na.omit(link)
+      link
+    },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
+    output$stat_apps <- renderDataTable({
+      apps <- head(sort(table(DFcontent$application),decreasing = T, na.rm = T), n <- 10)
+      apps <- as.data.frame(as.table(apps))
+      names(apps) <- c('Application','Frequency')
+      apps[apps$Application=="",] <- NA
+      apps <- na.omit(apps)
+      apps[apps$Application==" ",] <- NA
+      apps <- na.omit(apps)
+      apps
+    },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
+
+    output$authors <- renderDataTable({
+      withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
                          Sys.sleep(1)
                          set.seed(111)
                          graph <- cbind(DF$post_id,DF$actor_id)

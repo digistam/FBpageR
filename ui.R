@@ -51,7 +51,22 @@ shinyUI(
                mainPanel(
                  plotOutput('likersGraph', height = 1200, width = '100%')
                  )
+          )
+    ),
+    tabPanel("Statistics",
+             mainPanel(
+               fluidRow(
+                 tags$head(tags$style("tfoot {display: hidden;}")),
+                HTML('<h1><b>Links</b></h1>'),
+                  dataTableOutput(outputId = 'stat_links'),
+                HTML('<hr>')
+               ),
+               fluidRow(
+                 HTML('<h1><b>Applications</b></h1>'),
+                  dataTableOutput(outputId = 'stat_apps'),
+                 HTML('<hr>')
+                 )
+             )
     )
-)
   )
 )
