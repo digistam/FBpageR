@@ -16,6 +16,12 @@ if (!require(devtools)) {
 }
 library(shinyIncubator)
 
+library(sqldf)
+if (!require("sqldf")) {
+  install.packages("sqldf", repos="http://cran.rstudio.com/") 
+  library("sqldf") 
+}
+
 shinyServer(function(input, output, session) {
   observe({
     inFile<-input$dbfile
@@ -31,8 +37,8 @@ shinyServer(function(input, output, session) {
         DFcontent <<- as.data.frame.matrix(q)
         q <- dbGetQuery(con, "SELECT * FROM likes")
         DFlikes <<- as.data.frame.matrix(q)  
-        DF <- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
-        names(DF) <- c("post_id","id","object_id","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
+        DF <<- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
+        names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
         DF$date <- as.POSIXct(DF$date,format = "%Y-%m-%dT%H:%M:%S+0000", tz = "UTC")
         DF$date <- with_tz(DF$date, "Europe/Paris")
         DF <<- DF
@@ -79,31 +85,113 @@ shinyServer(function(input, output, session) {
       dd <- merge(dd, ev, by = 'Username',incomparables = NULL, all.x = TRUE)
       
       dd[is.na(dd)] <- 0
-      tbl <- dd
+      tbl <<- dd
       names(tbl) <- c('Account','Name','Frequency','Degree','PageRank','Eigenvector')
-      tbl <- tbl[order(tbl$Frequency, decreasing = T),]
+      tbl <<- tbl[order(tbl$Frequency, decreasing = T),]
       df <- tbl
       df[!df$PageRank == 0, ]
       })
     })
-    output$stat_links <- renderDataTable({
-      link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
-      link <- as.data.frame(as.table(link))
-      names(link) <- c('Url','Frequency')
-      link[link$Url=="",] <- NA
-      link <- na.omit(link)
-      link
-    },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
-    output$stat_apps <- renderDataTable({
-      apps <- head(sort(table(DFcontent$application),decreasing = T, na.rm = T), n <- 10)
-      apps <- as.data.frame(as.table(apps))
-      names(apps) <- c('Application','Frequency')
-      apps[apps$Application=="",] <- NA
-      apps <- na.omit(apps)
-      apps[apps$Application==" ",] <- NA
-      apps <- na.omit(apps)
-      apps
-    },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
+
+    output$stat_likers <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating bubble chart", detail = "This may take a few moments...")
+                         Sys.sleep(0.5)
+                         gvisBubbleChart(tbl[tbl$Degree > 1,],idvar = "Account", xvar="Degree", yvar="Frequency", options=list( hAxis='{title: "Degree"}',vAxis='{title: "Frequency"}' ,width = '100%', height=800) )
+    })})
+    output$stat_objectLikes <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      Sys.sleep(0.5)  
+      objectLikes <- as.data.frame(cbind(DFcontent$object_id,as.numeric(DFcontent$likes)))
+      objectLikes <- na.omit(objectLikes)
+      names(objectLikes) <- c('object_id','likes')
+      objectLikes <- sqldf("select object_id,sum(likes) from objectLikes group by object_id")
+      names(objectLikes) <- c('object_id','likes')
+      gvisPieChart(objectLikes,options=list(
+        #slices="{4: {offset: 0.2}, 0: {offset: 0.3}}",
+        title='Likes per object',
+        pieSliceText='label',
+        legend.position = 'labeled',
+        pieSliceText = 'value',
+        pieHole=0.2
+      )
+      )
+      })
+    })
+    output$stat_objectPosts <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+                         Sys.sleep(0.5)  
+#                          objectLikes <- as.data.frame(cbind(DFcontent$object_id,as.numeric(DFcontent$likes)))
+#                          objectLikes <- na.omit(objectLikes)
+#                          names(objectLikes) <- c('object_id','likes')
+                         objectPosts <- sqldf("select object_id,count(object_id) from DFcontent group by object_id")
+                         names(objectPosts) <- c('object_id','posts')
+                         gvisPieChart(objectPosts,options=list(
+                           #slices="{4: {offset: 0.2}, 0: {offset: 0.3}}",
+                           title='Posts per object',
+                           pieSliceText='label',
+                           legend.position = 'labeled',
+                           pieSliceText = 'value',
+                           pieHole=0.2
+                         )
+                         )
+      })
+    })
+
+#     output$stat_links <- renderDataTable({
+#       link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
+#       link <- as.data.frame(as.table(link))
+#       names(link) <- c('Url','Frequency')
+#       link[link$Url=="",] <- NA
+#       link <- na.omit(link)
+#       link
+#       
+#     },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
+    link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
+    link <- as.data.frame(as.table(link))
+    names(link) <- c('Url','Frequency')
+    link[link$Url=="",] <- NA
+    link <- na.omit(link)
+    output$stat_links <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+                             Sys.sleep(0.5)
+      gvisPieChart(link,options=list(
+      #slices="{4: {offset: 0.2}, 0: {offset: 0.3}}",
+      title='Link analysis',
+      pieSliceText='label',
+      legend.position = 'labeled',
+      pieSliceText = 'value',
+      pieHole=0.2
+      )
+    )
+    })})
+    apps <- head(sort(table(DFcontent$application),decreasing = T, na.rm = T), n <- 10)
+    apps <- as.data.frame(as.table(apps))
+    names(apps) <- c('Application','Frequency')
+    apps[apps$Application=="",] <- NA
+    apps <- na.omit(apps)
+    apps[apps$Application==" ",] <- NA
+    apps <- na.omit(apps)
+  
+#     output$stat_apps <- renderDataTable({
+#       apps <- head(sort(table(DFcontent$application),decreasing = T, na.rm = T), n <- 10)
+#       apps <- as.data.frame(as.table(apps))
+#       names(apps) <- c('Application','Frequency')
+#       apps[apps$Application=="",] <- NA
+#       apps <- na.omit(apps)
+#       apps[apps$Application==" ",] <- NA
+#       apps <- na.omit(apps)
+#       apps
+#     },options = list(paging = FALSE, searching = FALSE, searchable = FALSE))
+    output$stat_apps <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+                             Sys.sleep(0.5)
+      gvisPieChart(apps,options=list(
+      #slices="{4: {offset: 0.2}, 0: {offset: 0.3}}",
+      title='App analysis',
+      pieSliceText='label',
+      pieHole=0.2
+    ))})
+    })
 
     output$authors <- renderDataTable({
       withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
@@ -148,13 +236,23 @@ shinyServer(function(input, output, session) {
                          tbl <- tbl[order(tbl$Frequency, decreasing = T),]
                          df <- tbl
                          #df[!df$PageRank == 0, ]
-  })
-})
+      })
+    })
+    dftype <- as.data.frame(table(DFcontent$type))
+    output$Types <- renderGvis({
+      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+                             Sys.sleep(0.5)
+      gvisPieChart(dftype,options=list(
+        title='Post types',
+        pieSliceText='label',
+        pieHole=0.2)
+                   )
+    })})
     output$likersGraph <- suppressWarnings(renderPlot({
         withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
         Sys.sleep(0.5)
         #graph <- cbind(DF$liker_id,DF$post_id)
-        graph <- cbind(DF$liker,DF$actor)
+        graph <- cbind(DF$liker_id,DF$actor_id)
         na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
         g <- graph.data.frame(graph, directed = T)
         g <- delete.vertices(g, which(is.na(V(g)$name))) 
@@ -183,7 +281,7 @@ shinyServer(function(input, output, session) {
 output$authorsGraph <- suppressWarnings(renderPlot({
   withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
                          Sys.sleep(0.5)
-                         graph <- cbind(DF$actor,DF$post_id)
+                         graph <- cbind(DF$actor_id,DF$post_id)
                          na.omit(unique(graph)) # omit pairs with NA, get only unique pairs
                          g <- graph.data.frame(graph, directed = T)
                          g <- delete.vertices(g, which(is.na(V(g)$name))) 
@@ -191,10 +289,10 @@ output$authorsGraph <- suppressWarnings(renderPlot({
                          ng <- delete.vertices(g, bad.vs)
                          setProgress(detail = "Generating nodes and edges ...")
                          Sys.sleep(1)
-                         V(ng)$size = degree(ng)
+                         V(ng)$size = 2 #degree(ng)/4
                          V(ng)$color = degree(ng)+1
-                         V(ng)$label.cex[degree(ng) > 20] = 3
-                         V(ng)$label.cex[degree(ng) < 20] = degree(ng)/3
+                         V(ng)$label.cex[degree(ng) > 20] = 2
+                         V(ng)$label.cex[degree(ng) < 20] = 1 #degree(ng)/4
                          V(ng)$label.cex[V(ng)$label.cex < 1] = 1
                          setProgress(detail = "Generating labels ...")
                          Sys.sleep(1)

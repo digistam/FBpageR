@@ -17,7 +17,10 @@ shinyUI(
       #actionButton("goButton", "Query"),
       progressInit(),
       fluidRow(
-        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[4],DF[5],DF[7],DF[8],DF[10],DF[11],DF[12],DF[13],DF[16])), inline = T),
+        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[4],DF[5],DF[7],DF[8],DF[10],DF[11],DF[12],DF[13],DF[14],DF[17])), inline = T)
+        ),
+      fluidRow(
+        
         dataTableOutput(outputId="stream"),
         tags$head(tags$style("tfoot {display: table-header-group;}"))
     )
@@ -30,6 +33,7 @@ shinyUI(
                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
     tabPanel("Likers",
+             
              fluidRow(
                dataTableOutput(outputId="likers"),
                tags$head(tags$style("tfoot {display: table-header-group;}")))
@@ -55,18 +59,40 @@ shinyUI(
     ),
     tabPanel("Statistics",
              mainPanel(
+               
                fluidRow(
-                 tags$head(tags$style("tfoot {display: hidden;}")),
-                HTML('<h1><b>Links</b></h1>'),
-                  dataTableOutput(outputId = 'stat_links'),
-                HTML('<hr>')
-               ),
-               fluidRow(
-                 HTML('<h1><b>Applications</b></h1>'),
-                  dataTableOutput(outputId = 'stat_apps'),
+                 column(5,
+                 htmlOutput('Types'),
+                 #plotOutput('Types', height = 400, width = 400)
                  HTML('<hr>')
-                 )
+               ),
+               column(5,
+                 htmlOutput('stat_objectLikes')
+                 )),
+               fluidRow(
+               column(5,
+                 htmlOutput('stat_objectPosts')
+               ),
+               column(5,
+                # tags$head(tags$style("tfoot {display: hidden;}")),
+                # HTML('<h1><b>Links</b></h1>'),
+                # dataTableOutput(outputId = 'stat_links'),
+                htmlOutput('stat_links'),
+                HTML('<hr>')
+               )),
+               fluidRow(
+               column(5,
+                 # HTML('<h1><b>Applications</b></h1>'),
+                 # dataTableOutput(outputId = 'stat_apps'),
+                htmlOutput('stat_apps'),
+                HTML('<hr>')
+                 ))
              )
+    ),
+    tabPanel("Likers statistics",
+    fluidRow(
+      htmlOutput('stat_likers'),
+      HTML('<hr>')
     )
-  )
+  ))
 )

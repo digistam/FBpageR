@@ -10,7 +10,7 @@ from urllib2 import HTTPError, URLError
 # import credentials
 import facebookcredentials
 #_access_token = facebookcredentials.ACCESS_TOKEN
-_access_token = 'CAACEdEose0cBAKeMOSkficT3RpnyyrQZA09cXucPxJMlFwAlKSiwuDeCxe5MzIExH210zJIFSK92YLBofIuvl9IIVGkSz7ZABvzARjQVF1te0NsGUhZBCDgJ7FNpYmHTEvu0X9mFRCB8QYYAoBI3bZC9ROZBQzmQdAeouaIk6ZCIUjZCVYph3gk4pyoyhtZAMWg5PK9o1VxZAF3XaoWg2DpfRSNNhhjIWmsUZD'
+_access_token = 'CAACEdEose0cBANTvNyV5GZBd7bHrlsxZCsxvBXJwZC9w1W7jFAXu8wnboSK1HtBe4GQNulZCD6VXyoga3kiuVyOe4ZBpCxMJqSvc1Qi07FTUyZBKnVXscFMMjCl3QH6ZCwUelVGcGZBd4BKOdkG4JivZA9ZAv6o6TxS8VpiUVXBHA9jTdn7hRyp9BeoZAaj9wX02Q1ZB1oQRFRv15w6HPZC6zS8VwbmKeGbyNArsZD'
 
 import sqlite3
 conn = sqlite3.connect('avifauna.db')
@@ -24,7 +24,7 @@ from time import sleep
 import facebookobjects
 
 # create table if not exists
-table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
+table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, type TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
 c.execute(table)
 likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_id TEXT)"
 c.execute(likeTable)
@@ -34,7 +34,7 @@ def parse_stream(object_id):
     try:
         print object_id
         # Query the Facebook database
-        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description}&access_token=%s' % (_object_id,_access_token))
+        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,_access_token))
         parsed_json = json.load(urllib2.urlopen(url))
         #print parsed_json
         dict = []
@@ -43,6 +43,10 @@ def parse_stream(object_id):
             #initialize the row
             row = []
             row.append(_object_id)
+            if item.has_key("type"):
+                row.append(item['type'])
+            else:
+                row.append(' ')
             row.append(parsed_json['name'].encode('utf-8'))
             row.append(item['id'])
             row.append(item['from']['name'].encode('utf-8'))
@@ -98,6 +102,7 @@ def parse_stream(object_id):
                 for i in range(len(item['comments']['data'])):
                     row = []
                     row.append(_object_id)
+                    row.append('comment')
                     row.append(parsed_json['name'].encode('utf-8'))
                     row.append(item['comments']['data'][i]['id'])
                     row.append(item['comments']['data'][i]['from']['name'].encode('utf-8'))
@@ -115,7 +120,7 @@ def parse_stream(object_id):
                 e
 
             #print row
-            sql = "INSERT INTO stream (object_id, object_name, post_id, actor, actor_id, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            sql = "INSERT INTO stream (object_id, type, object_name, post_id, actor, actor_id, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             c.executemany(sql, dict)
             likeSql = "INSERT INTO likes (post_id, actor, actor_id) VALUES (?,?,?)"
             c.executemany(likeSql, likedict)
