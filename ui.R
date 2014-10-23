@@ -58,36 +58,29 @@ shinyUI(
           )
     ),
     tabPanel("Statistics",
-             mainPanel(
-               
                fluidRow(
                  column(5,
                  htmlOutput('Types'),
-                 #plotOutput('Types', height = 400, width = 400)
-                 HTML('<hr>')
+                 offset = 0
                ),
                column(5,
-                 htmlOutput('stat_objectLikes')
+                 htmlOutput('stat_objectLikes'),
+                 offset = 1
                  )),
                fluidRow(
                column(5,
-                 htmlOutput('stat_objectPosts')
+                 htmlOutput('stat_objectPosts'),
+                 offset = 0
                ),
                column(5,
-                # tags$head(tags$style("tfoot {display: hidden;}")),
-                # HTML('<h1><b>Links</b></h1>'),
-                # dataTableOutput(outputId = 'stat_links'),
                 htmlOutput('stat_links'),
-                HTML('<hr>')
+                offset = 1
                )),
                fluidRow(
                column(5,
-                 # HTML('<h1><b>Applications</b></h1>'),
-                 # dataTableOutput(outputId = 'stat_apps'),
                 htmlOutput('stat_apps'),
-                HTML('<hr>')
+                offset = 0
                  ))
-             )
     ),
     tabPanel("Likers statistics",
     fluidRow(
