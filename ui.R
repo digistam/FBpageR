@@ -11,20 +11,47 @@ library(shinyIncubator)
 shinyUI(
   
   navbarPage(  
-    "Facebook Feed Analyzer", id="nav", windowTitle="Dataset",
+    "Facebook Analyzer", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
       fileInput('dbfile', 'Load Dataset ::'),
       #actionButton("goButton", "Query"),
       progressInit(),
       fluidRow(
-        checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[4],DF[5],DF[7],DF[8],DF[10],DF[11],DF[12],DF[13],DF[14],DF[17])), inline = T)
+        column(5,
+               htmlOutput('Types'),
+               offset = 0
         ),
+        column(5,
+               htmlOutput('stat_objectLikes'),
+               offset = 1
+        )),
       fluidRow(
-        
-        dataTableOutput(outputId="stream"),
-        tags$head(tags$style("tfoot {display: table-header-group;}"))
-    )
+        column(5,
+               htmlOutput('stat_objectPosts'),
+               offset = 0
+        ),
+        column(5,
+               htmlOutput('stat_links'),
+               offset = 1
+        )),
+      fluidRow(
+        column(5,
+               htmlOutput('stat_apps'),
+               offset = 0
+        ))
+
     ),
+    
+    tabPanel("DataTable",
+             fluidRow(
+               checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[4],DF[5],DF[7],DF[8],DF[10],DF[11],DF[12],DF[13],DF[14],DF[17])), inline = T)
+             ),
+             fluidRow(
+               
+               dataTableOutput(outputId="stream"),
+               tags$head(tags$style("tfoot {display: table-header-group;}"))
+             )
+             ),
 
     tabPanel("Authors",
              fluidRow(
@@ -39,9 +66,10 @@ shinyUI(
                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
     tabPanel("Authors Graph",
-             mainPanel(
-               plotOutput('authorsGraph', height = 1200, width = '100%')
-             )
+             plotOutput('authorsGraph', height = 1200, width = '100%')
+#              mainPanel(
+#                plotOutput('authorsGraph', height = 1200, width = '100%')
+#              )
              ),
     tabPanel("Likers Graph",
              tags$link(rel = 'stylesheet', type = 'text/css', href = 'styles.css'),
@@ -56,36 +84,37 @@ shinyUI(
                  plotOutput('likersGraph', height = 1200, width = '100%')
                  )
           )
-    ),
-    tabPanel("Statistics",
-               fluidRow(
-                 column(5,
-                 htmlOutput('Types'),
-                 offset = 0
-               ),
-               column(5,
-                 htmlOutput('stat_objectLikes'),
-                 offset = 1
-                 )),
-               fluidRow(
-               column(5,
-                 htmlOutput('stat_objectPosts'),
-                 offset = 0
-               ),
-               column(5,
-                htmlOutput('stat_links'),
-                offset = 1
-               )),
-               fluidRow(
-               column(5,
-                htmlOutput('stat_apps'),
-                offset = 0
-                 ))
-    ),
-    tabPanel("Likers statistics",
-    fluidRow(
-      htmlOutput('stat_likers'),
-      HTML('<hr>')
-    )
-  ))
-)
+    )#,
+#     tabPanel("Statistics",
+#                fluidRow(
+#                  column(5,
+#                  htmlOutput('Types'),
+#                  offset = 0
+#                ),
+#                column(5,
+#                  htmlOutput('stat_objectLikes'),
+#                  offset = 1
+#                  )),
+#                fluidRow(
+#                column(5,
+#                  htmlOutput('stat_objectPosts'),
+#                  offset = 0
+#                ),
+#                column(5,
+#                 htmlOutput('stat_links'),
+#                 offset = 1
+#                )),
+#                fluidRow(
+#                column(5,
+#                 htmlOutput('stat_apps'),
+#                 offset = 0
+#                  ))
+#     ),
+
+#     tabPanel("Likers statistics",
+#     fluidRow(
+#       htmlOutput('stat_likers'),
+#       HTML('<hr>')
+#     )
+#)
+))
