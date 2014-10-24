@@ -60,10 +60,11 @@ shinyUI(
                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
     tabPanel("Likers",
-             
-             fluidRow(
-               dataTableOutput(outputId="likers"),
-               tags$head(tags$style("tfoot {display: table-header-group;}")))
+             dataTableOutput(outputId="likers"),
+             tags$head(tags$style("tfoot {display: table-header-group;}"))
+#              fluidRow(
+#                dataTableOutput(outputId="likers"),
+#                tags$head(tags$style("tfoot {display: table-header-group;}")))
     ),
     tabPanel("Authors Graph",
              plotOutput('authorsGraph', height = 1200, width = '100%')
