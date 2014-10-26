@@ -48,7 +48,7 @@ shinyUI(
     
     tabPanel("DataTable",
              fluidRow(
-               checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[4],DF[5],DF[7],DF[8],DF[10],DF[11],DF[12],DF[13],DF[14],DF[17])), inline = T)
+               checkboxGroupInput('show_vars', '', names(DF), selected = names(c(DF[2],DF[4],DF[5],DF[7],DF[9],DF[10],DF[11],DF[12],DF[13],DF[14],DF[15],DF[16],DF[17],DF[21],DF[22])), inline = T)
              ),
              fluidRow(
                

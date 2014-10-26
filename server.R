@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize=100*1024^2)
+options(shiny.maxRequestSize=200*1024^2)
 library(lubridate)
 if (!require("lubridate")) {
   install.packages("lubridate", repos="http://cran.rstudio.com/") 
@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
     q <- dbGetQuery(con, "SELECT * FROM likes")
     DFlikes <<- as.data.frame.matrix(q)  
     DF <<- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
-    names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","actor_pic", "date","message","story","link","description","comments","likes","application","like_id","liker","liker_id", "liker_pic")
+    names(DF) <- c("post_id","post_url","id","object_id","type","object_name","actor","actor_url", "actor_id","actor_pic", "date","message","story","link","description","comments","likes","application","like_id","liker","liker_id","liker_pic", "liker_url")
     DF$date <- as.POSIXct(DF$date,format = "%Y-%m-%dT%H:%M:%S+0000", tz = "UTC")
     DF$date <- with_tz(DF$date, "Europe/Paris")
     DF <<- DF

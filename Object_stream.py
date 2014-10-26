@@ -8,10 +8,10 @@ import json
 import urllib2
 from urllib2 import HTTPError, URLError
 # credentials
-_access_token = "CAACEdEose0cBAGaAmZA9BCa0eb8WqgJspq4nzpkEy5UhiiVKKj8w2GmZCHkmi0FlKKcPJxQAhOuOuutmQFh4gnba7qLXpAwAvyvOJF5ZA7nZCHZB9R54az0aXIf9HVZB2MZACj7R34lbYrKikbZB4k9KxYpFckdz17m3gftAPh7IIc9hRePKa0CM3IXwRqttAeEZAPSl8ShAIVgEQbFVp4ZBXX"
+_access_token = "CAACEdEose0cBAIIPZAT1cVZCQgQuMdkT4DlvTjujzqEE3c6edm3xkIkEUZAe9rOm4j8ZAZAXIZAqPowUmkLGc7BpGDbmlbhZAL5rKdDkXzKmkdn2ZCrzaF8Jbe7uUgWjOuPKcnPDnD1wl4GGZAiaTKbd4gRUnaOBpEkHIGWJUhX5mW0zJnEl29aFdEvdyDZBSlVbogpbDNLsIZBagsOsc3BhAyV"
 
 import sqlite3
-conn = sqlite3.connect('avifauna.db')
+conn = sqlite3.connect('mh17.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -22,9 +22,9 @@ from time import sleep
 import facebookobjects
 
 # create table if not exists
-table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, type TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,actor_pic TEXT, date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
+table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, type TEXT, object_name TEXT, post_id TEXT,post_url TEXT, actor TEXT,actor_url TEXT, actor_id TEXT,actor_pic TEXT, date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
 c.execute(table)
-likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_id TEXT, actor_pic TEXT)"
+likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_url TEXT, actor_id TEXT, actor_pic TEXT)"
 c.execute(likeTable)
 
 # create the function
@@ -45,9 +45,15 @@ def parse_stream(object_id):
                 row.append(item['type'])
             else:
                 row.append(' ')
-            row.append(parsed_json['name'].encode('utf-8'))
+            row.append(parsed_json['name'])
             row.append(item['id'])
-            row.append(item['from']['name'].encode('utf-8'))
+            if str(item['id']).find("_") == -1:
+              post_url = str(item['id'])
+            else:
+              post_url = str.split(str(item['id']),'_')[1]
+            row.append('<a target=_blank href=http://www.facebook.com/%s/posts/%s>post</a>' % (object_id, post_url))
+            row.append(item['from']['name'])
+            row.append('<a target=_blank href=http://www.facebook.com/' + item['from']['id'] + '>' + item['from']['name'] + '</a>')
             row.append(item['from']['id'])
             row.append('<img src=http://graph.facebook.com/' + item['from']['id'] + '/picture>')
             row.append(item['created_time'])           
@@ -60,11 +66,11 @@ def parse_stream(object_id):
             else:
                 row.append(' ')
             if item.has_key("link"):
-                row.append('<a target=_blank href=' + item['link'] + '>' + item['link'] + '</a>')
+                row.append('<a target=_blank href=' + item['link'].encode('utf-8') + '>' + item['link'].encode('utf-8') + '</a>')
             else:
                 row.append('')
             if item.has_key("description"):
-                row.append(item['description'])
+                row.append(item['description'].encode('utf-8'))
             else:
                 row.append('')
             try:
@@ -87,6 +93,7 @@ def parse_stream(object_id):
                     likeRow = []
                     likeRow.append(item['id'])
                     likeRow.append(item['likes']['data'][i]['name'])
+                    likeRow.append('<a target=_blank href=http://www.facebook.com/' + item['likes']['data'][i]['id'] + '>' + item['likes']['data'][i]['name'] + '</a>')
                     likeRow.append(item['likes']['data'][i]['id'])
                     likeRow.append('<img src=http://graph.facebook.com/' + item['likes']['data'][i]['id'] + '/picture>')
                     print likeRow
@@ -94,7 +101,7 @@ def parse_stream(object_id):
             except KeyError, e:
                 row.append(0)
             if item.has_key("application"):
-                row.append(item['application']['name'].encode('utf-8'))
+                row.append(item['application']['name'])
             else:
                 row.append(' ')
             dict.append(row)
@@ -103,9 +110,15 @@ def parse_stream(object_id):
                     row = []
                     row.append(_object_id)
                     row.append('comment')
-                    row.append(parsed_json['name'].encode('utf-8'))
+                    row.append(parsed_json['name'])
                     row.append(item['comments']['data'][i]['id'])
-                    row.append(item['comments']['data'][i]['from']['name'].encode('utf-8'))
+                    if str(item['comments']['data'][i]['id']).find("_") == -1:
+                      post_url = str(item['comments']['data'][i]['id'])
+                    else:
+                      post_url = str.split(str(item['comments']['data'][i]['id']),'_')[1]
+                    row.append('<a target=_blank href=http://www.facebook.com/%s/posts/%s>post</a>' % (object_id, post_url))
+                    row.append(item['comments']['data'][i]['from']['name'])
+                    row.append('<a target=_blank href=http://www.facebook.com/' + item['comments']['data'][i]['from']['id'] + '>' + item['comments']['data'][i]['from']['name'] + '</a>')
                     row.append(item['comments']['data'][i]['from']['id'])
                     row.append('<img src=http://graph.facebook.com/' + item['comments']['data'][i]['from']['id'] + '/picture>')
                     row.append(item['comments']['data'][i]['created_time'])
@@ -121,15 +134,18 @@ def parse_stream(object_id):
                 e
 
             #print row
-            sql = "INSERT INTO stream (object_id, type, object_name, post_id, actor, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            sql = "INSERT INTO stream (object_id, type, object_name, post_id, post_url, actor, actor_url, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             c.executemany(sql, dict)
-            likeSql = "INSERT INTO likes (post_id, actor, actor_id, actor_pic) VALUES (?,?,?,?)"
+            likeSql = "INSERT INTO likes (post_id, actor, actor_url, actor_id, actor_pic) VALUES (?,?,?,?,?)"
             c.executemany(likeSql, likedict)
             conn.commit()
     except KeyError, e:
         print "KeyError: %s" % e
     except ValueError, e:
         print "ValueError: %s" % e
+        print "#####"
+        print item
+        print "#####"
     except HTTPError, e:
         print "HTTPError: %s" % e
     except URLError, e:
