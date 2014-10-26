@@ -13,31 +13,35 @@ shinyUI(
   navbarPage(  
     "Facebook Analyzer", id="nav", windowTitle="Dataset",
     tabPanel("Dataset",
+     
       fileInput('dbfile', 'Load Dataset ::'),
       #actionButton("goButton", "Query"),
       progressInit(),
       fluidRow(
-        column(5,
+        column(2,
                htmlOutput('Types'),
                offset = 0
         ),
-        column(5,
+        column(1,
                htmlOutput('stat_objectLikes'),
                offset = 1
+        ),
+        column(2,
+               htmlOutput('stat_objectPosts'),
+               offset = 2
         )),
       fluidRow(
-        column(5,
-               htmlOutput('stat_objectPosts'),
+        column(2,
+               htmlOutput('stat_links'),
                offset = 0
         ),
-        column(5,
-               htmlOutput('stat_links'),
-               offset = 1
-        )),
-      fluidRow(
-        column(5,
+        column(1,
                htmlOutput('stat_apps'),
-               offset = 0
+               offset = 1
+        ),
+        column(2,
+               htmlOutput('stat_video'),
+               offset = 2
         ))
 
     ),

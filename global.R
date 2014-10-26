@@ -22,8 +22,8 @@ queryTable <- function(x) {
   q <- dbGetQuery(con, paste("SELECT * FROM ", x, "", sep=""))
   DF <<- as.data.frame(q)
 }
-DF <- data.frame(replicate(18,sample(0:1,20,rep=TRUE)))
-names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
+DF <- data.frame(replicate(20,sample(0:1,20,rep=TRUE)))
+names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","actor_pic", "date","message","story","link","description","comments","likes","application","like_id","liker","liker_id","liker_pic")
 
 as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 

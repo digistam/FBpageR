@@ -8,7 +8,7 @@ import json
 import urllib2
 from urllib2 import HTTPError, URLError
 # credentials
-_access_token = "CAACEdEose0cBADhTBPRPmVy6FK9QJIxAmtc8XWR3AULd2nq84adksJCYkiDJ3MdfzgCGZB9GZBIexOY1ozOzhoCugu98S3c8kC5dGQNNr2XI2fpMqKvj077MOTIYD6GRJTIeNEAnpQhUlkuxHkVBzkxtC2zZBUKQa8DHgyTZBD8GF2fjb35ZAyXzToK749TTSLtQfscsaUxTwbFLNh6gRvlBZANvgbcjMZD"
+_access_token = "CAACEdEose0cBAGaAmZA9BCa0eb8WqgJspq4nzpkEy5UhiiVKKj8w2GmZCHkmi0FlKKcPJxQAhOuOuutmQFh4gnba7qLXpAwAvyvOJF5ZA7nZCHZB9R54az0aXIf9HVZB2MZACj7R34lbYrKikbZB4k9KxYpFckdz17m3gftAPh7IIc9hRePKa0CM3IXwRqttAeEZAPSl8ShAIVgEQbFVp4ZBXX"
 
 import sqlite3
 conn = sqlite3.connect('avifauna.db')
@@ -22,9 +22,9 @@ from time import sleep
 import facebookobjects
 
 # create table if not exists
-table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, type TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
+table = "CREATE TABLE IF NOT EXISTS stream (id INTEGER PRIMARY KEY AUTOINCREMENT, object_id TEXT, type TEXT, object_name TEXT, post_id TEXT,actor TEXT,actor_id TEXT,actor_pic TEXT, date TEXT, message TEXT, story TEXT, link TEXT, description TEXT, comments TEXT, likes INTEGER, application TEXT)"  #% _event_id
 c.execute(table)
-likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_id TEXT)"
+likeTable = "CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id TEXT, actor TEXT,actor_id TEXT, actor_pic TEXT)"
 c.execute(likeTable)
 
 # create the function
@@ -49,6 +49,7 @@ def parse_stream(object_id):
             row.append(item['id'])
             row.append(item['from']['name'].encode('utf-8'))
             row.append(item['from']['id'])
+            row.append('<img src=http://graph.facebook.com/' + item['from']['id'] + '/picture>')
             row.append(item['created_time'])           
             if item.has_key("message"):
                 row.append(item['message'].encode('utf-8'))
@@ -59,7 +60,7 @@ def parse_stream(object_id):
             else:
                 row.append(' ')
             if item.has_key("link"):
-                row.append(item['link'])
+                row.append('<a target=_blank href=' + item['link'] + '>' + item['link'] + '</a>')
             else:
                 row.append('')
             if item.has_key("description"):
@@ -87,6 +88,7 @@ def parse_stream(object_id):
                     likeRow.append(item['id'])
                     likeRow.append(item['likes']['data'][i]['name'])
                     likeRow.append(item['likes']['data'][i]['id'])
+                    likeRow.append('<img src=http://graph.facebook.com/' + item['likes']['data'][i]['id'] + '/picture>')
                     print likeRow
                     likedict.append(likeRow)
             except KeyError, e:
@@ -105,6 +107,7 @@ def parse_stream(object_id):
                     row.append(item['comments']['data'][i]['id'])
                     row.append(item['comments']['data'][i]['from']['name'].encode('utf-8'))
                     row.append(item['comments']['data'][i]['from']['id'])
+                    row.append('<img src=http://graph.facebook.com/' + item['comments']['data'][i]['from']['id'] + '/picture>')
                     row.append(item['comments']['data'][i]['created_time'])
                     row.append(item['comments']['data'][i]['message'].encode('utf-8'))
                     row.append('')
@@ -118,9 +121,9 @@ def parse_stream(object_id):
                 e
 
             #print row
-            sql = "INSERT INTO stream (object_id, type, object_name, post_id, actor, actor_id, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            sql = "INSERT INTO stream (object_id, type, object_name, post_id, actor, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             c.executemany(sql, dict)
-            likeSql = "INSERT INTO likes (post_id, actor, actor_id) VALUES (?,?,?)"
+            likeSql = "INSERT INTO likes (post_id, actor, actor_id, actor_pic) VALUES (?,?,?,?)"
             c.executemany(likeSql, likedict)
             conn.commit()
     except KeyError, e:

@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
     q <- dbGetQuery(con, "SELECT * FROM likes")
     DFlikes <<- as.data.frame.matrix(q)  
     DF <<- merge(DFcontent, DFlikes, by = 'post_id',incomparables = NULL, all.x = TRUE)
-    names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","date","message","story","link","description","comments","likes","application","like_id","liker","liker_id")
+    names(DF) <- c("post_id","id","object_id","type","object_name","actor","actor_id","actor_pic", "date","message","story","link","description","comments","likes","application","like_id","liker","liker_id", "liker_pic")
     DF$date <- as.POSIXct(DF$date,format = "%Y-%m-%dT%H:%M:%S+0000", tz = "UTC")
     DF$date <- with_tz(DF$date, "Europe/Paris")
     DF <<- DF
@@ -85,34 +85,69 @@ shinyServer(function(input, output, session) {
       gvisBubbleChart(tbl[tbl$Degree > 1,],idvar = "Account", xvar="Degree", yvar="Frequency", options=list( hAxis='{title: "Degree"}',vAxis='{title: "Frequency"}' ,width = '100%', height=800) )
     })})
     output$stat_objectLikes <- renderGvis({
-      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      withProgress(session, {setProgress(message = "Likes per object", detail = "This may take a few moments...")
       Sys.sleep(0.5)  
       objectLikes <- as.data.frame(cbind(DFcontent$object_id,as.numeric(DFcontent$likes)))
       objectLikes <- na.omit(objectLikes)
       names(objectLikes) <- c('object_id','likes')
       objectLikes <- sqldf("select object_id,sum(likes) from objectLikes group by object_id")
       names(objectLikes) <- c('object_id','likes')
-      gvisPieChart(objectLikes,options=list(
-        title='Likes per object',
-        pieSliceText='label',
-        legend.position = 'labeled',
-        pieSliceText = 'value',
-        pieHole=0.2
+      gvisColumnChart(objectLikes,options=list(
+        width=420,
+        height=250,
+        title='Likes per object'
+#         pieSliceText='label',
+#         legend.position = 'labeled',
+#         pieSliceText = 'value',
+#         pieHole=0.2
       ))
       })
     })
     output$stat_objectPosts <- renderGvis({
-      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      withProgress(session, {setProgress(message = "Posts per object", detail = "This may take a few moments...")
       Sys.sleep(0.5)  
       objectPosts <- sqldf("select object_id,count(object_id) from DFcontent group by object_id")
       names(objectPosts) <- c('object_id','posts')
-      gvisPieChart(objectPosts,options=list(
-      title='Posts per object',
-      pieSliceText='label',
-      legend.position = 'labeled',
-      pieSliceText = 'value',
-      pieHole=0.2
+      gvisColumnChart(objectPosts,options=list(
+        width=420,
+        height=250,
+      title='Posts per object'
+#       pieSliceText='label',
+#       legend.position = 'labeled',
+#       pieSliceText = 'value',
+#       pieHole=0.2,
+#       slices="{
+#       0: {offset: 0.2},
+#       1: {offset: 0.2},
+#       2: {offset: 0.2},
+#       3: {offset: 0.2},
+#       4: {offset: 0.2},
+#       5: {offset: 0.2}
+#       }"
       ))
+      })
+    })
+    output$stat_video <- renderGvis({
+      withProgress(session, {setProgress(message = "Popular videos", detail = "This may take a few moments...")
+                             Sys.sleep(0.5)  
+                             dd <- DF$link[grep('(http://.*meo.com/.*|http://.*tube.com/.*|http://.*tu.be/.*|.*video.*)',DF$link)]
+                             dd <- table(dd)
+                             dd <- as.data.frame(as.table(dd))
+                             gvisColumnChart(dd,options=list(
+                               width=420,
+                               height=250,
+                               title='Popular videos',
+                               pieSliceText='label',
+                               legend.position = 'labeled'
+#                                pieSliceText = 'value',
+#                                pieHole=0.2,
+#                                slices="{
+#                                 0: {offset: 0.2},
+#                                 1: {offset: 0.2},
+#                                 2: {offset: 0.2},
+#                                 5: {offset: 0.2}
+#                               }"
+                             ))
       })
     })
     link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
@@ -121,14 +156,16 @@ shinyServer(function(input, output, session) {
     link[link$Url=="",] <- NA
     link <- na.omit(link)
     output$stat_links <- renderGvis({
-      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      withProgress(session, {setProgress(message = "Link analysis", detail = "This may take a few moments...")
       Sys.sleep(0.5)
-      gvisPieChart(link,options=list(
-      title='Link analysis',
-      pieSliceText='label',
-      legend.position = 'labeled',
-      pieSliceText = 'value',
-      pieHole=0.2
+      gvisColumnChart(link,options=list(
+      width=420,
+      height=250,
+      title='Link analysis'
+#       pieSliceText='label',
+#       legend.position = 'labeled',
+#       pieSliceText = 'value',
+#       pieHole=0.2
       ))
     })})
     
@@ -141,23 +178,31 @@ shinyServer(function(input, output, session) {
     apps <- na.omit(apps)
   
     output$stat_apps <- renderGvis({
-      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      withProgress(session, {setProgress(message = "App analysis", detail = "This may take a few moments...")
       Sys.sleep(0.5)
-      gvisPieChart(apps,options=list(
-       title='App analysis',
-       pieSliceText='label',
-       pieHole=0.2
+      gvisColumnChart(apps,options=list(
+        width=420,
+        height=250,
+       title='App analysis'
+#        pieSliceText='label',
+#        pieHole=0.2
     ))
     })})
 
     dftype <- as.data.frame(table(DFcontent$type))
     output$Types <- renderGvis({
-      withProgress(session, {setProgress(message = "Creating pie chart", detail = "This may take a few moments...")
+      withProgress(session, {setProgress(message = "Post types", detail = "This may take a few moments...")
       Sys.sleep(0.5)
-      gvisPieChart(dftype,options=list(
-        title='Post types',
-        pieSliceText='label',
-        pieHole=0.2))
+      gvisColumnChart(dftype,options=list(
+        width=420,
+        height=250,
+        title='Post types'
+#         pieSliceText='label',
+#         pieHole=0.2,
+#         slices="{
+#           0: {offset: 0.2}
+#           }"
+        ))
     })})
     output$likersGraph <- suppressWarnings(renderPlot({
         withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
