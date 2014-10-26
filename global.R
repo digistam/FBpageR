@@ -23,8 +23,7 @@ queryTable <- function(x) {
   DF <<- as.data.frame(q)
 }
 DF <- data.frame(replicate(23,sample(0:1,23,rep=TRUE)))
-names(DF) <- c("post_id","post_url","id","object_id","type","object_name","actor","actor_url", "actor_id","actor_pic", "date","message","story","link","description","comments","likes","application","like_id","liker","liker_id","liker_pic", "liker_url")
-
+names(DF) <- c("post_id","id","object_id","type","object_name","post_url","actor","actor_url","actor_id","actor_pic","date","message","story","link","description","comments","likes","application","like_id","liker","liker_url","liker_id","liker_pic")
 as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
 textMine <- function(x) {
