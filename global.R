@@ -22,8 +22,9 @@ queryTable <- function(x) {
   q <- dbGetQuery(con, paste("SELECT * FROM ", x, "", sep=""))
   DF <<- as.data.frame(q)
 }
-DF <- data.frame(replicate(23,sample(0:1,23,rep=TRUE)))
-names(DF) <- c("post_id","id","object_id","type","object_name","post_url","actor","actor_url","actor_id","actor_pic","date","message","story","link","description","comments","likes","application","like_id","liker","liker_url","liker_id","liker_pic")
+# DF <- data.frame(replicate(23,sample(0:1,23,rep=TRUE)))
+# #names(DF) <- c("post_id","id","object_id","type","object_name","post_url","actor","actor_url","actor_id","actor_pic","date","message","story","link","description","comments","likes","application","like_id","liker","liker_url","liker_id","liker_pic")
+#names(DF) <- c("date","object_name","type","actor_url","actor_pic","post_url","likes","comments","liker_url","liker_pic","message","story","description","link")
 as.numeric.factor <- function(x) {as.numeric(levels(x))[x]}
 
 textMine <- function(x) {
@@ -103,4 +104,7 @@ Authors <- function(x,y) {
   dd <- merge(dd, pr, by = 'Username',incomparables = NULL, all.x = TRUE)
   dd <- merge(dd, ev, by = 'Username',incomparables = NULL, all.x = TRUE)
   ddA <<- dd
+}
+cleanHTML <- function(x) {
+  return(gsub("<.*?>", "", x))
 }

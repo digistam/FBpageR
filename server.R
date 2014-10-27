@@ -51,9 +51,11 @@ shinyServer(function(input, output, session) {
     
     output$stream <- renderDataTable({
       isolate({
-        DF
-      })
-      DF[, input$show_vars, drop = FALSE]
+        subDF <- DF[, c("date","object_name","type","actor_url","actor_pic","post_url","likes","comments","liker_url","liker_pic","message","story","description","link")]
+        names(subDF) <- c("date","object_name","type","actor_url","actor_pic","post_url","likes","comments","liker_url","liker_pic","message","story","description","link")
+        subDF
+      })      
+      #subDF[, input$show_vars, drop = FALSE]
     })
     output$likers <- renderDataTable({
       withProgress(session, {setProgress(message = "Calculating, please wait", detail = "This may take a few moments...")
@@ -87,11 +89,11 @@ shinyServer(function(input, output, session) {
     output$stat_objectLikes <- renderGvis({
       withProgress(session, {setProgress(message = "Likes per object", detail = "This may take a few moments...")
       Sys.sleep(0.5)  
-      objectLikes <- as.data.frame(cbind(DFcontent$object_id,as.numeric(DFcontent$likes)))
+      objectLikes <- as.data.frame(cbind(DFcontent$object_name,as.numeric(DFcontent$likes)))
       objectLikes <- na.omit(objectLikes)
-      names(objectLikes) <- c('object_id','likes')
-      objectLikes <- sqldf("select object_id,sum(likes) from objectLikes group by object_id")
-      names(objectLikes) <- c('object_id','likes')
+      names(objectLikes) <- c('object_name','likes')
+      objectLikes <- sqldf("select object_name,sum(likes) from objectLikes group by object_name")
+      names(objectLikes) <- c('object_name','likes')
       gvisColumnChart(objectLikes,options=list(
         width=420,
         height=250,
@@ -106,8 +108,8 @@ shinyServer(function(input, output, session) {
     output$stat_objectPosts <- renderGvis({
       withProgress(session, {setProgress(message = "Posts per object", detail = "This may take a few moments...")
       Sys.sleep(0.5)  
-      objectPosts <- sqldf("select object_id,count(object_id) from DFcontent group by object_id")
-      names(objectPosts) <- c('object_id','posts')
+      objectPosts <- sqldf("select object_name,count(object_name) from DFcontent group by object_name")
+      names(objectPosts) <- c('object_name','posts')
       gvisColumnChart(objectPosts,options=list(
         width=420,
         height=250,
@@ -131,7 +133,7 @@ shinyServer(function(input, output, session) {
       withProgress(session, {setProgress(message = "Popular videos", detail = "This may take a few moments...")
                              Sys.sleep(0.5)  
                              dd <- DF$link[grep('(http://.*meo.com/.*|http://.*tube.com/.*|http://.*tu.be/.*|.*video.*)',DF$link)]
-                             dd <- table(dd)
+                             dd <- table(cleanHTML(dd))
                              dd <- as.data.frame(as.table(dd))
                              gvisColumnChart(dd,options=list(
                                width=420,
@@ -150,7 +152,7 @@ shinyServer(function(input, output, session) {
                              ))
       })
     })
-    link <- head(sort(table(DFcontent$link),decreasing = T, na.rm = T), n <- 10)
+    link <- head(sort(table(cleanHTML(DFcontent$link)),decreasing = T, na.rm = T), n <- 10)
     link <- as.data.frame(as.table(link))
     names(link) <- c('Url','Frequency')
     link[link$Url=="",] <- NA
