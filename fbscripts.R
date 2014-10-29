@@ -36,6 +36,9 @@ fbg <- function(x) {
     }}
   df <- as.data.frame(cbind(name,id,gender,locale))
   write.csv(df,file="demo.csv",row.names=FALSE)
+  df <- read.csv('demo.csv')
+  df$id <- as.character(df$id)
+  print(df)
   #write.table(paste(id,',#',name,sep=""),file='test.txt',quote = FALSE, col.names = F, row.names = F)
   #write.table(df, file = "demo.csv", append = FALSE, quote = TRUE, sep = ";",eol = "\n", na = "NA", dec = ".", row.names = FALSE,col.names = TRUE, qmethod = c("escape", "double"),fileEncoding = "UTF-8")
 }

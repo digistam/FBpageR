@@ -8,10 +8,10 @@ import json
 import urllib2
 from urllib2 import HTTPError, URLError
 # credentials
-_access_token = "CAACEdEose0cBAGC9Q5ZBmJb8lWHIxTzyQ9kuIDuZC4YeAB7Aktu4AKxur4tJom8iTzLJ9o5Jnn9SgELomnOnnSjGG9deJnmWoZC04g3LrlmnUpAaa1EWNfrMRWSCkO014RECLcaEoe7cDFfw9uZCgZAaZBF7Osh87NGoArdtWhX1vXd43NZCUWZCtVh3ZBcaKqAvyVjRsP7RUzWas5fP2PFwgouaTJKpuvfUZD"
+_access_token = "CAACEdEose0cBAGfmk7QV7uEVdjj2EBGxJbkxUDRPsKf2JlcCbUe3paIKWSbZADvqNl7xKj5i61Ub7r56sK6nIs4N2uae2efOZAWaJLx4AwrLQfZBpRATk16lMm0s6iZBMyKImS7ZCL2qwcF0x2reiLrX1GZC0L0wZAba3eeZABzHziQuk77jq3kTZBFeE4YWOPbRhBSoHDh9iKPdZA8K3BJiaU"
 
 import sqlite3
-conn = sqlite3.connect('haagsyrie.db')
+conn = sqlite3.connect('goudamorocco.db')
 conn.text_factory = str
 c = conn.cursor()
 
