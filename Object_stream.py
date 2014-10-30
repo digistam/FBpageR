@@ -8,10 +8,10 @@ import json
 import urllib2
 from urllib2 import HTTPError, URLError
 # credentials
-_access_token = "CAACEdEose0cBAGfmk7QV7uEVdjj2EBGxJbkxUDRPsKf2JlcCbUe3paIKWSbZADvqNl7xKj5i61Ub7r56sK6nIs4N2uae2efOZAWaJLx4AwrLQfZBpRATk16lMm0s6iZBMyKImS7ZCL2qwcF0x2reiLrX1GZC0L0wZAba3eeZABzHziQuk77jq3kTZBFeE4YWOPbRhBSoHDh9iKPdZA8K3BJiaU"
+_access_token = "CAACEdEose0cBAD4ylXJGhdj6g2ycgRuhZCujx9HQ56gbZC44cvAeqIMuXDz2VpnlAh8k4DZAjLQO7HZASho0FlLZAlinToGdfzPQ7ROFFDIZBT6mzC2FbmZCXWAhpvaZCZBceLFwaFzUGTIbZAIKWwUTaVXoPU7mtHQ5cXXRsuK6JkuI5qAVqWZCZCN3L4Pb71ixqi89z8H9ID6f75Lxnz6DJtGy"
 
 import sqlite3
-conn = sqlite3.connect('goudamorocco.db')
+conn = sqlite3.connect('roemenen.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -30,7 +30,6 @@ c.execute(likeTable)
 # create the function
 def parse_stream(object_id):
     try:
-        print object_id
         # Query the Facebook database
         url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,_access_token))
         parsed_json = json.load(urllib2.urlopen(url))
@@ -59,6 +58,7 @@ def parse_stream(object_id):
             row.append(item['created_time'])           
             if item.has_key("message"):
                 row.append(item['message'].encode('utf-8'))
+                print item['message']
             else:
                 row.append(' ')
             if item.has_key("story"):
@@ -96,7 +96,6 @@ def parse_stream(object_id):
                     likeRow.append('<a target=_blank href=http://www.facebook.com/' + item['likes']['data'][i]['id'] + '>' + item['likes']['data'][i]['name'] + '</a>')
                     likeRow.append(item['likes']['data'][i]['id'])
                     likeRow.append('<img src=http://graph.facebook.com/' + item['likes']['data'][i]['id'] + '/picture>')
-                    print likeRow
                     likedict.append(likeRow)
             except KeyError, e:
                 row.append(0)

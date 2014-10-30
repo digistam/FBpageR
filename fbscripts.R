@@ -26,7 +26,9 @@ fbg <- function(x) {
     profiles <- gsub("\\?.*","",profiles)
     profiles <- gsub("https://www.facebook.com/","",profiles)
     userList <- capture.output(write.table(matrix(as.character(profiles),nrow=1), sep=",",row.names=FALSE, col.names=FALSE, quote=FALSE))
-    userList <- gsub("profile.php,","",userList)
+    userList <- gsub("profile.php","",userList)
+    userList <- gsub(",,",",",userList)
+    userList <- gsub(",$","",userList)
     # print(userList)
     json_file <- paste('http://graph.facebook.com/?ids=',userList,sep="")
     raw <- getURL(json_file,.opts = list(ssl.verifypeer = FALSE))
@@ -36,9 +38,9 @@ fbg <- function(x) {
     }}
   df <- as.data.frame(cbind(name,id,gender,locale))
   write.csv(df,file="demo.csv",row.names=FALSE)
-  df <- read.csv('demo.csv')
-  df$id <- as.character(df$id)
-  print(df)
+#   df <- read.csv('demo.csv')
+#   df$id <- as.character(df$id)
+#   print(df)
   #write.table(paste(id,',#',name,sep=""),file='test.txt',quote = FALSE, col.names = F, row.names = F)
   #write.table(df, file = "demo.csv", append = FALSE, quote = TRUE, sep = ";",eol = "\n", na = "NA", dec = ".", row.names = FALSE,col.names = TRUE, qmethod = c("escape", "double"),fileEncoding = "UTF-8")
 }
