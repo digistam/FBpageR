@@ -16,7 +16,7 @@ import facebookobjects
 _access_token = facebookcredentials.ACCESS_TOKEN
 
 import sqlite3
-conn = sqlite3.connect('amsterdamgroupsnew.db')
+conn = sqlite3.connect('sqlite.db')
 conn.text_factory = str
 c = conn.cursor()
 
