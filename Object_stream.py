@@ -22,6 +22,8 @@ c = conn.cursor()
 
 import time
 from time import sleep
+import datetime
+yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
 
 # import object list
 import facebookobjects
