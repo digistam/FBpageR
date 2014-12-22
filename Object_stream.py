@@ -7,11 +7,16 @@
 import json
 import urllib2
 from urllib2 import HTTPError, URLError
+import facebookcredentials
+
+# import object list
+import facebookobjects
+
 # credentials
-_access_token = "CAACEdEose0cBAD4ylXJGhdj6g2ycgRuhZCujx9HQ56gbZC44cvAeqIMuXDz2VpnlAh8k4DZAjLQO7HZASho0FlLZAlinToGdfzPQ7ROFFDIZBT6mzC2FbmZCXWAhpvaZCZBceLFwaFzUGTIbZAIKWwUTaVXoPU7mtHQ5cXXRsuK6JkuI5qAVqWZCZCN3L4Pb71ixqi89z8H9ID6f75Lxnz6DJtGy"
+_access_token = facebookcredentials.ACCESS_TOKEN
 
 import sqlite3
-conn = sqlite3.connect('roemenen.db')
+conn = sqlite3.connect('amsterdamgroupsnew.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -31,7 +36,7 @@ c.execute(likeTable)
 def parse_stream(object_id):
     try:
         # Query the Facebook database
-        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,_access_token))
+        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.since(%s).limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,time.mktime(yesterday.timetuple()),_access_token))
         parsed_json = json.load(urllib2.urlopen(url))
         #print parsed_json
         dict = []
