@@ -5,18 +5,20 @@
 
 # IMPORTS
 import json
+import csv
 import urllib2
 from urllib2 import HTTPError, URLError
-import facebookcredentials
+#import facebookcredentials
 
 # import object list
 import facebookobjects
 
 # credentials
-_access_token = facebookcredentials.ACCESS_TOKEN
+#_access_token = facebookcredentials.ACCESS_TOKEN
+_access_token = 'CAACEdEose0cBAKMgK43bWY2apVke7Sjrb4nZB714iqGYepZCmK9FASuXV0FWShHonfPj23i0WNgCALnnjVh8ipEw41m90IgQ7ypZBMwSgmWQf6sxYIfPiDhc7qsuwb5RCQequLv8UXTOTNzmmBIbS6eonPTEPpFIKwP52jLNfu0opMR0bdFhapICLtQNjmWdAKjDSbVFcgqVmZCnA5N3oxn4IoKxyeoZD'
 
 import sqlite3
-conn = sqlite3.connect('sqlite.db')
+conn = sqlite3.connect('ttt.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -38,11 +40,12 @@ c.execute(likeTable)
 def parse_stream(object_id):
     try:
         # Query the Facebook database
-        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.since(%s).limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,time.mktime(yesterday.timetuple()),_access_token))
+        url = urllib2.Request('https://graph.facebook.com/%s?fields=name,feed.limit(100){from,created_time,likes.limit(100),comments,message,story,application,story_tags,link,description,type}&access_token=%s' % (_object_id,_access_token))
         parsed_json = json.load(urllib2.urlopen(url))
         #print parsed_json
         dict = []
         likedict = []
+
         for item in parsed_json['feed']['data']:
             #initialize the row
             row = []
@@ -135,11 +138,14 @@ def parse_stream(object_id):
                     row.append('')
                     row.append('')
                     row.append('')
+                    wr.writerow(row)
                     dict.append(row)
+
             except KeyError, e:
                 e
 
             #print row
+
             sql = "INSERT INTO stream (object_id, type, object_name, post_id, post_url, actor, actor_url, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             c.executemany(sql, dict)
             likeSql = "INSERT INTO likes (post_id, actor, actor_url, actor_id, actor_pic) VALUES (?,?,?,?,?)"
@@ -157,10 +163,12 @@ def parse_stream(object_id):
     except URLError, e:
         print "URLError: %s" % e
 # do the magic job
+myfile = open('c:\\temp\\fbtest.csv', 'wb')
+wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
 for i in range(len(facebookobjects.objects)):
     _object_id = facebookobjects.objects[i]
     parse_stream(facebookobjects.objects[i])
-
+myfile.close()
 # remove duplicate items from table
 dups = "DELETE FROM stream WHERE id NOT IN (SELECT MAX(id) FROM stream GROUP BY post_id);"
 c.execute(dups)
