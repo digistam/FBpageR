@@ -15,7 +15,6 @@ import facebookobjects
 
 # credentials
 #_access_token = facebookcredentials.ACCESS_TOKEN
-_access_token = 'CAACEdEose0cBAKMgK43bWY2apVke7Sjrb4nZB714iqGYepZCmK9FASuXV0FWShHonfPj23i0WNgCALnnjVh8ipEw41m90IgQ7ypZBMwSgmWQf6sxYIfPiDhc7qsuwb5RCQequLv8UXTOTNzmmBIbS6eonPTEPpFIKwP52jLNfu0opMR0bdFhapICLtQNjmWdAKjDSbVFcgqVmZCnA5N3oxn4IoKxyeoZD'
 
 import sqlite3
 conn = sqlite3.connect('ttt.db')
@@ -106,6 +105,7 @@ def parse_stream(object_id):
                     likeRow.append('<a target=_blank href=http://www.facebook.com/' + item['likes']['data'][i]['id'] + '>' + item['likes']['data'][i]['name'] + '</a>')
                     likeRow.append(item['likes']['data'][i]['id'])
                     likeRow.append('<img src=http://graph.facebook.com/' + item['likes']['data'][i]['id'] + '/picture>')
+                    lF.writerow(likeRow)
                     likedict.append(likeRow)
             except KeyError, e:
                 row.append(0)
@@ -138,7 +138,7 @@ def parse_stream(object_id):
                     row.append('')
                     row.append('')
                     row.append('')
-                    wr.writerow(row)
+                    tF.writerow(row)
                     dict.append(row)
 
             except KeyError, e:
@@ -162,13 +162,20 @@ def parse_stream(object_id):
         print "HTTPError: %s" % e
     except URLError, e:
         print "URLError: %s" % e
+
 # do the magic job
-myfile = open('c:\\temp\\fbtest.csv', 'wb')
-wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+_access_token = 'CAACEdEose0cBACm6dfZB5OXpHIslyQ8zoAacqxxOzbOAXDLRqROcnJU4hlRToZCt5TP7ZCaV5obcQno6dA0EuI9TxVukzvUNdzpJpDkZCnYUlUtqRQBunZBTBPiZBCUTy2IglZAZBlDZCBtwZCUWyXZBrxVB5zxaSivsF83Yn3Uo1BKydWEvkZC4HF4PPOAZBfGdlhAXWiKkZAbQqMNDR0zMbgHrwmMNjghkZCXkQUZD'
+targetFile = open('c:\\temp\\fbtest.csv', 'wb')
+tF = csv.writer(targetFile, quoting=csv.QUOTE_ALL)
+likersFile = open('c:\\temp\\fblikers.csv', 'wb')
+lF = csv.writer(likersFile, quoting=csv.QUOTE_ALL)
 for i in range(len(facebookobjects.objects)):
     _object_id = facebookobjects.objects[i]
     parse_stream(facebookobjects.objects[i])
-myfile.close()
+targetFile.close()
+likersFile.close()
+
+
 # remove duplicate items from table
 dups = "DELETE FROM stream WHERE id NOT IN (SELECT MAX(id) FROM stream GROUP BY post_id);"
 c.execute(dups)
