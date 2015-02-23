@@ -138,12 +138,11 @@ def parse_stream(object_id):
                     row.append('')
                     row.append('')
                     row.append('')
-                    tF.writerow(row)
                     dict.append(row)
 
             except KeyError, e:
                 e
-
+            tF.writerow(row)
             #print row
 
             sql = "INSERT INTO stream (object_id, type, object_name, post_id, post_url, actor, actor_url, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
@@ -164,11 +163,13 @@ def parse_stream(object_id):
         print "URLError: %s" % e
 
 # do the magic job
-_access_token = 'CAACEdEose0cBACm6dfZB5OXpHIslyQ8zoAacqxxOzbOAXDLRqROcnJU4hlRToZCt5TP7ZCaV5obcQno6dA0EuI9TxVukzvUNdzpJpDkZCnYUlUtqRQBunZBTBPiZBCUTy2IglZAZBlDZCBtwZCUWyXZBrxVB5zxaSivsF83Yn3Uo1BKydWEvkZC4HF4PPOAZBfGdlhAXWiKkZAbQqMNDR0zMbgHrwmMNjghkZCXkQUZD'
-targetFile = open('c:\\temp\\fbtest.csv', 'wb')
+_access_token = 'CAACEdEose0cBACt5ekFWxaU4ZBUDyAr70vtILVbstE9Fv5mIvTwv694ATWZCGssEkP2TajZAeOXxVZArIwO6DZBMHvyx2ZAFZCx6Nnw97Sx47kApzsMLb8W4bO9l8ZBTWMo5SRHq2bbPykDCkhGX87gIZB2Yx0hQMwmX9z2FZAeXpV8zbrQ7Dxn7v7zUjGRF9IklDUzfHcnU0Al0GpcZC2rtJTLynsYkPMRFmEZD'
+targetFile = open('fbtest_.csv', 'wb')
 tF = csv.writer(targetFile, quoting=csv.QUOTE_ALL)
-likersFile = open('c:\\temp\\fblikers.csv', 'wb')
+tF.writerow(["page_id","type","page_name","post_id","post_url","author","author_url","author_id","author_picture","post_time","post_contents","ll","mm","nn","oo","pp","qq"])
+likersFile = open('fblikers_.csv', 'wb')
 lF = csv.writer(likersFile, quoting=csv.QUOTE_ALL)
+lF.writerow(["post_id","liker_name","liker_url","liker_id", "liker_picture"])
 for i in range(len(facebookobjects.objects)):
     _object_id = facebookobjects.objects[i]
     parse_stream(facebookobjects.objects[i])
