@@ -17,7 +17,7 @@ import facebookobjects
 #_access_token = facebookcredentials.ACCESS_TOKEN
 
 import sqlite3
-conn = sqlite3.connect('ttt.db')
+conn = sqlite3.connect('mc.db')
 conn.text_factory = str
 c = conn.cursor()
 
@@ -60,7 +60,7 @@ def parse_stream(object_id):
             else:
               post_url = str.split(str(item['id']),'_')[1]
             row.append('<a target=_blank href=http://www.facebook.com/%s/posts/%s>post</a>' % (object_id, post_url))
-            row.append(item['from']['name'])
+            row.append(item['from']['name'].encode('utf-8'))
             row.append('<a target=_blank href=http://www.facebook.com/' + item['from']['id'] + '>' + item['from']['name'] + '</a>')
             row.append(item['from']['id'])
             row.append('<img src=http://graph.facebook.com/' + item['from']['id'] + '/picture>')
@@ -75,7 +75,8 @@ def parse_stream(object_id):
             else:
                 row.append(' ')
             if item.has_key("link"):
-                row.append('<a target=_blank href=' + item['link'].encode('utf-8') + '>' + item['link'].encode('utf-8') + '</a>')
+                #row.append('<a target=_blank href=' + item['link'].encode('utf-8') + '>' + item['link'].encode('utf-8') + '</a>')
+                row.append(item['link'].encode('utf-8'))
             else:
                 row.append('')
             if item.has_key("description"):
@@ -101,8 +102,14 @@ def parse_stream(object_id):
                 for i in range(len(item['likes']['data'])):
                     likeRow = []
                     likeRow.append(item['id'])
-                    likeRow.append(item['likes']['data'][i]['name'])
-                    likeRow.append('<a target=_blank href=http://www.facebook.com/' + item['likes']['data'][i]['id'] + '>' + item['likes']['data'][i]['name'] + '</a>')
+                    likerName = item['likes']['data'][i]['name'].encode('utf-8')
+                    #likeRow.append(item['likes']['data'][i]['name'].encode('utf-8'))
+                    likeRow.append(likerName)
+                    try:
+                        likeRow.append('<a target=_blank href=http://www.facebook.com/' + item['likes']['data'][i]['id'].encode('utf-8') + '>' + likerName + '</a>')
+                    except:
+                        import pdb; pdb.set_trace()
+
                     likeRow.append(item['likes']['data'][i]['id'])
                     likeRow.append('<img src=http://graph.facebook.com/' + item['likes']['data'][i]['id'] + '/picture>')
                     lF.writerow(likeRow)
@@ -131,7 +138,7 @@ def parse_stream(object_id):
                     row.append(item['comments']['data'][i]['from']['id'])
                     row.append('<img src=http://graph.facebook.com/' + item['comments']['data'][i]['from']['id'] + '/picture>')
                     row.append(item['comments']['data'][i]['created_time'])
-                    row.append(item['comments']['data'][i]['message'].encode('utf-8'))
+                    row.append(item['comments']['data'][i]['message'])
                     row.append('')
                     row.append('')
                     row.append('')
@@ -142,7 +149,20 @@ def parse_stream(object_id):
 
             except KeyError, e:
                 e
-            tF.writerow(row)
+            try:
+                encoded_row = []
+                for i in row:
+                    if isinstance(i, basestring):
+                        try:
+                            col = i.encode('utf-8')
+                        except UnicodeDecodeError:
+                            col = i
+                        encoded_row.append(col)
+                    else:
+                        encoded_row.append(i)
+                tF.writerow(encoded_row)
+            except Exception as e:
+                import pdb; pdb.set_trace()
             #print row
 
             sql = "INSERT INTO stream (object_id, type, object_name, post_id, post_url, actor, actor_url, actor_id, actor_pic, date, message, story, link, description, comments, likes, application) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
@@ -152,22 +172,23 @@ def parse_stream(object_id):
             conn.commit()
     except KeyError, e:
         print "KeyError: %s" % e
-    except ValueError, e:
-        print "ValueError: %s" % e
-        print "#####"
-        print item
-        print "#####"
+#    except ValueError, e:
+#        print "ValueError: %s" % e
+#        import pdb;pdb.set_trace()l
+#        print "#####"
+#        print item
+#        print "#####"
     except HTTPError, e:
         print "HTTPError: %s" % e
     except URLError, e:
         print "URLError: %s" % e
 
 # do the magic job
-_access_token = 'CAACEdEose0cBACt5ekFWxaU4ZBUDyAr70vtILVbstE9Fv5mIvTwv694ATWZCGssEkP2TajZAeOXxVZArIwO6DZBMHvyx2ZAFZCx6Nnw97Sx47kApzsMLb8W4bO9l8ZBTWMo5SRHq2bbPykDCkhGX87gIZB2Yx0hQMwmX9z2FZAeXpV8zbrQ7Dxn7v7zUjGRF9IklDUzfHcnU0Al0GpcZC2rtJTLynsYkPMRFmEZD'
-targetFile = open('fbtest_.csv', 'wb')
+_access_token = 'CAACEdEose0cBAFNEqDWIU8JAgfAlUl1Prns3tAca25wDIGTZAseHZAEcX1Sr1IMD77rWZBZAIpXz39a6nXeVPZBE7ZBOIzkKB33iKYlV0ckfGQx7F95ZAw1QRZCeZBeRrPkWrKe3QyU7QbJ7E9TECfuimZAnmsnwl1Bzqi65vWipGmJhIlcyfkZAwvsGdas4r6L41Uis3ekFCsk3n2DhHMm57yexEAB0g80B4UZD'
+targetFile = open('fbposts.csv', 'wb')
 tF = csv.writer(targetFile, quoting=csv.QUOTE_ALL)
-tF.writerow(["page_id","type","page_name","post_id","post_url","author","author_url","author_id","author_picture","post_time","post_contents","ll","mm","nn","oo","pp","qq"])
-likersFile = open('fblikers_.csv', 'wb')
+tF.writerow(["page_id","type","page_name","post_id","post_url","author","author_url","author_id","author_picture","post_time","post_contents","story","urls","caption","comment_count","like_count","app"])
+likersFile = open('fblikers.csv', 'wb')
 lF = csv.writer(likersFile, quoting=csv.QUOTE_ALL)
 lF.writerow(["post_id","liker_name","liker_url","liker_id", "liker_picture"])
 for i in range(len(facebookobjects.objects)):
